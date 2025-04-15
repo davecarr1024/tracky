@@ -1,0 +1,76 @@
+[tool.poetry]
+name = "tracky"
+version = "0.1.0"
+description = "A grid-based toy train simulator with simple physics and extensible track modeling."
+authors = ["Dave Carr <davecarr1024@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.13"
+black = "^25.1.0"
+pytest = "^8.3.5"
+pytest-cov = "^4.0.0"
+pytest-subtests = "^0.14.1"
+pytest-repeat = "^0.9.3"
+pyright = "^1.1.398"
+ruff = "^0.11.3"
+
+[tool.black]
+line-length = 88
+include = 'tracky'
+exclude = '''
+/(
+    \.git
+  | \.mypy_cache
+  | \.venv
+  | \.local
+  | \.cache
+  | \.idea
+  | \.vscode
+  | _build
+  | build
+  | dist
+  | __pycache__
+  | .*/__pycache__
+  | .*/\.gitignore
+  | .*/\.local/share/virtualenv/.*
+)/
+'''
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B"]
+# Specify the rule codes that Ruff is allowed to fix.
+fixable = ["ALL"]  # Allows autofix for all enabled rules.
+unfixable = []     # No rules are marked as unfixable.
+ignore = ["E402"]
+
+[tool.pyright]
+include = ["tracky"]
+exclude = ["**/node_modules", "**/__pycache__"]
+strict = ["tracky"]
+pythonVersion = "3.13"
+typeCheckingMode = "strict"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-s --capture=no -vv --cov=tracky --cov-report=term-missing"
+# addopts = "-s --capture=no -vv tracky/components/nand_test.py::test_nand"
+
+[tool.poe.tasks]
+format = "black ."
+lint = "ruff check --fix tracky"
+typecheck = "pyright"
+test = "pytest"
+all = ["format", "lint", "typecheck", "test"]
+watch = "pyright --watch"
+dump = "./dump.sh"
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "def __str__",
+    "if __name__ == .__main__.:",
+]
