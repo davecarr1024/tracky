@@ -1,6 +1,8 @@
+from typing import Iterable
+
 import pytest
 
-from tracky.track.grid import DOWN, RIGHT, UP, Grid, Position
+from tracky.track.grid import DOWN, LEFT, RIGHT, UP, Direction, Grid, Position
 from tracky.track.piece import Connection, Piece
 
 
@@ -73,7 +75,8 @@ def test_connection() -> None:
     c = Connection(UP, DOWN)
     piece = Piece(Position(0, 0), connections={c})
     assert piece.connection(UP) is c
-    assert piece.connection(DOWN) is None
+    with pytest.raises(Piece.KeyError):
+        piece.connection(DOWN)
 
 
 def test_reverse_position() -> None:
@@ -102,3 +105,25 @@ def test_forward_piece() -> None:
     piece2 = Piece(Position(1, 0))
     grid.add_piece(piece2)
     assert piece.forward_piece(UP) is piece2
+
+
+def assert_piece_is(
+    piece: Piece,
+    position: Position,
+    connections: Iterable[tuple[Direction, Direction]],
+) -> None:
+    assert piece.position == position
+    assert {
+        (c.reverse_direction, c.forward_direction) for c in piece.connections
+    } == set(connections)
+
+
+def test_create() -> None:
+    p = Piece.create(Position(0, 0), UP, DOWN)
+    assert_piece_is(p, Position(0, 0), {(UP, DOWN), (DOWN, UP)})
+
+
+def test_create_line() -> None:
+    line = list(Piece.create_line(Position(0, 0), RIGHT, 3))
+    for i in range(3):
+        assert_piece_is(line[i], Position(0, i), {(LEFT, RIGHT), (RIGHT, LEFT)})

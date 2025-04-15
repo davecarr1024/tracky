@@ -1,13 +1,15 @@
 from collections import defaultdict
 from typing import Iterable, Mapping, Optional, override
 
-from tracky.core import Validatable
+from tracky.core import Error, Validatable
 from tracky.track.grid.direction import Direction
 from tracky.track.grid.position import Position
 from tracky.track.piece.connection import Connection
 
 
 class Piece(Validatable):
+    class KeyError(Error, KeyError): ...
+
     def __init__(
         self,
         position: Position,
@@ -94,8 +96,13 @@ class Piece(Validatable):
             connection.reverse_direction: connection for connection in self.connections
         }
 
-    def connection(self, direction: Direction) -> Optional[Connection]:
-        return self.connections_by_direction.get(direction)
+    def connection(self, direction: Direction) -> Connection:
+        try:
+            return self.connections_by_direction[direction]
+        except KeyError as e:
+            raise self.KeyError(
+                f"no connection for direction {direction} in piece {self}"
+            ) from e
 
     def reverse_position(self, direction: Direction) -> Optional[Position]:
         if connection := self.connection(direction):
@@ -115,6 +122,40 @@ class Piece(Validatable):
     def forward_piece(self, direction: Direction) -> Optional["Piece"]:
         if position := self.forward_position(direction):
             return self._piece(position)
+
+    @staticmethod
+    def create(
+        position: Position,
+        reverse_direction: Direction,
+        forward_direction: Direction,
+    ) -> "Piece":
+        return Piece(
+            position=position,
+            connections=[
+                Connection(
+                    reverse_direction=reverse_direction,
+                    forward_direction=forward_direction,
+                ),
+                Connection(
+                    reverse_direction=forward_direction,
+                    forward_direction=reverse_direction,
+                ),
+            ],
+        )
+
+    @staticmethod
+    def create_line(
+        position: Position,
+        direction: Direction,
+        length: int,
+    ) -> Iterable["Piece"]:
+        for _ in range(length):
+            yield Piece.create(
+                position=position,
+                reverse_direction=-direction,
+                forward_direction=direction,
+            )
+            position += direction
 
 
 from tracky.track.grid import grid
