@@ -69,36 +69,36 @@ def test_duplicate_from_directions() -> None:
         Piece(Position(0, 0), connections={connection1, connection2})
 
 
-def test_connection_for_from_direction() -> None:
+def test_connection() -> None:
     c = Connection(UP, DOWN)
     piece = Piece(Position(0, 0), connections={c})
-    assert piece.connection_for_from_direction(UP) is c
-    assert piece.connection_for_from_direction(DOWN) is None
+    assert piece.connection(UP) is c
+    assert piece.connection(DOWN) is None
 
 
-def test_last_position_for_from_direction() -> None:
+def test_reverse_position() -> None:
     piece = Piece(Position(0, 0), connections={Connection(UP, DOWN)})
-    assert piece.last_position_for_from_direction(UP) == Position(-1, 0)
+    assert piece.reverse_position(UP) == Position(-1, 0)
 
 
-def test_last_piece_for_from_direction() -> None:
+def test_reverse_piece() -> None:
     piece = Piece(Position(0, 0), connections={Connection(UP, DOWN)})
     grid = Grid(pieces={piece})
-    assert piece.last_piece_for_from_direction(UP) is None
+    assert piece.reverse_piece(UP) is None
     piece2 = Piece(Position(-1, 0))
     grid.add_piece(piece2)
-    assert piece.last_piece_for_from_direction(UP) is piece2
+    assert piece.reverse_piece(UP) is piece2
 
 
-def test_next_position_for_from_direction() -> None:
+def test_forward_position() -> None:
     piece = Piece(Position(0, 0), connections={Connection(UP, DOWN)})
-    assert piece.next_position_for_from_direction(UP) == Position(1, 0)
+    assert piece.forward_position(UP) == Position(1, 0)
 
 
-def test_next_piece_for_from_direction() -> None:
+def test_forward_piece() -> None:
     piece = Piece(Position(0, 0), connections={Connection(UP, DOWN)})
     grid = Grid(pieces={piece})
-    assert piece.next_piece_for_from_direction(UP) is None
+    assert piece.forward_piece(UP) is None
     piece2 = Piece(Position(1, 0))
     grid.add_piece(piece2)
-    assert piece.next_piece_for_from_direction(UP) is piece2
+    assert piece.forward_piece(UP) is piece2

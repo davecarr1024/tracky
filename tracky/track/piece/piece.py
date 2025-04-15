@@ -24,6 +24,10 @@ class Piece(Validatable):
             self.grid = grid
 
     @override
+    def __repr__(self) -> str:
+        return f"Piece(position={self.__position}, connections={self.__connections})"
+
+    @override
     def __eq__(self, other: object) -> bool:
         return other is self
 
@@ -77,7 +81,7 @@ class Piece(Validatable):
             raise self._validation_error(f"not in grid {self.__grid}")
         connections_by_direction = defaultdict[Direction, set[Connection]](set)
         for connection in self.connections:
-            connections_by_direction[connection.from_direction].add(connection)
+            connections_by_direction[connection.reverse_direction].add(connection)
         for direction, connections in connections_by_direction.items():
             if len(connections) > 1:
                 raise self._validation_error(
@@ -85,37 +89,31 @@ class Piece(Validatable):
                 )
 
     @property
-    def connections_by_from_direction(self) -> Mapping[Direction, Connection]:
+    def connections_by_direction(self) -> Mapping[Direction, Connection]:
         return {
-            connection.from_direction: connection for connection in self.connections
+            connection.reverse_direction: connection for connection in self.connections
         }
 
-    def connection_for_from_direction(
-        self, direction: Direction
-    ) -> Optional[Connection]:
-        return self.connections_by_from_direction.get(direction)
+    def connection(self, direction: Direction) -> Optional[Connection]:
+        return self.connections_by_direction.get(direction)
 
-    def last_position_for_from_direction(
-        self, direction: Direction
-    ) -> Optional[Position]:
-        if connection := self.connection_for_from_direction(direction):
-            return self.position + connection.from_direction
+    def reverse_position(self, direction: Direction) -> Optional[Position]:
+        if connection := self.connection(direction):
+            return self.position + connection.reverse_direction
 
     def _piece(self, position: Position) -> Optional["Piece"]:
         return self.__grid.get(position) if self.__grid is not None else None
 
-    def last_piece_for_from_direction(self, direction: Direction) -> Optional["Piece"]:
-        if position := self.last_position_for_from_direction(direction):
+    def reverse_piece(self, direction: Direction) -> Optional["Piece"]:
+        if position := self.reverse_position(direction):
             return self._piece(position)
 
-    def next_position_for_from_direction(
-        self, direction: Direction
-    ) -> Optional[Position]:
-        if connection := self.connection_for_from_direction(direction):
-            return self.position + connection.to_direction
+    def forward_position(self, direction: Direction) -> Optional[Position]:
+        if connection := self.connection(direction):
+            return self.position + connection.forward_direction
 
-    def next_piece_for_from_direction(self, direction: Direction) -> Optional["Piece"]:
-        if position := self.next_position_for_from_direction(direction):
+    def forward_piece(self, direction: Direction) -> Optional["Piece"]:
+        if position := self.forward_position(direction):
             return self._piece(position)
 
 

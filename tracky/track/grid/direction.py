@@ -12,6 +12,19 @@ class Direction:
     drow: int
     dcol: int
 
+    def __str__(self) -> str:
+        match (self.drow, self.dcol):
+            case (0, 1):
+                return "RIGHT"
+            case (0, -1):
+                return "LEFT"
+            case (1, 0):
+                return "DOWN"
+            case (-1, 0):
+                return "UP"
+            case _:
+                raise self.ValueError(f"Invalid direction: {self.drow}, {self.dcol}")
+
     def __post_init__(self) -> None:
         if (self.drow, self.dcol) not in (
             (0, 1),
