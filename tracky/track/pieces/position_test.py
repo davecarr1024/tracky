@@ -32,3 +32,14 @@ def test_add() -> None:
     pos -= 1
     assert pos.piece is p1
     assert pos.u == 0.5
+
+
+def test_move_multiple_pieces() -> None:
+    p1, p2, p3 = Piece.create_line(GridPosition(0, 0), RIGHT, 3)
+    Grid(pieces={p1, p2, p3})
+    pos = TrackPosition(p1.connection(LEFT), 0.5)
+    assert pos.piece is p1
+    pos += 2
+    assert pos.piece is p3
+    pos -= 2
+    assert pos.piece is p1

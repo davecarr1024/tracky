@@ -1,6 +1,6 @@
 import pytest
 
-from tracky.track.grid import DOWN, UP, Grid, Position
+from tracky.track.grid import DOWN, LEFT, RIGHT, UP, Grid, Position
 from tracky.track.pieces import Connection, Piece
 
 
@@ -90,63 +90,49 @@ def test_invalid_piece() -> None:
         p._Piece__connections = frozenset[Connection]()  # type:ignore
 
 
-def test_connected_connections() -> None:
-    p1_going_down = Connection(UP, DOWN)
-    p1_going_up = Connection(DOWN, UP)
-    p1 = Piece(
-        Position(0, 0),
-        connections={
-            p1_going_down,
-            p1_going_up,
-        },
-    )
-    p2_going_down = Connection(UP, DOWN)
-    p2_going_up = Connection(DOWN, UP)
-    p2 = Piece(
-        Position(1, 0),
-        connections={
-            p2_going_down,
-            p2_going_up,
-        },
-    )
+def test_forward_connection() -> None:
+    p1, p2 = Piece.create_line(Position(0, 0), RIGHT, 2)
     Grid(pieces=[p1, p2])
+    assert p1.connection(LEFT).forward_connection is p2.connection(LEFT)
 
-    assert p1_going_down.forward_direction is DOWN
-    assert p1_going_down.forward_position == p2.position
-    assert p1_going_down.forward_piece is p2
-    assert p1_going_down.forward_connection is p2_going_down
 
-    assert p1_going_down.reverse_direction is UP
-    assert p1_going_down.reverse_position == Position(-1, 0)
-    assert p1_going_down.reverse_piece is None
-    assert p1_going_down.reverse_connection is None
+def test_forward_connection_not_found() -> None:
+    p1, p2 = Piece.create_line(Position(0, 0), RIGHT, 2)
+    Grid(pieces=[p1, p2])
+    assert p2.connection(LEFT).forward_connection is None
 
-    assert p1_going_up.forward_direction is UP
-    assert p1_going_up.forward_position == Position(-1, 0)
-    assert p1_going_up.forward_piece is None
-    assert p1_going_up.forward_connection is None
 
-    assert p1_going_up.reverse_direction is DOWN
-    assert p1_going_up.reverse_position == p2.position
-    assert p1_going_up.reverse_piece is p2
-    assert p1_going_up.reverse_connection is p2_going_down
+def test_reverse_connection() -> None:
+    p1, p2 = Piece.create_line(Position(0, 0), RIGHT, 2)
+    Grid(pieces=[p1, p2])
+    assert p2.connection(LEFT).reverse_connection is p1.connection(LEFT)
 
-    assert p2_going_up.forward_direction is UP
-    assert p2_going_up.forward_position == p1.position
-    assert p2_going_up.forward_piece is p1
-    assert p2_going_up.forward_connection is p1_going_up
 
-    assert p2_going_up.reverse_direction is DOWN
-    assert p2_going_up.reverse_position == Position(2, 0)
-    assert p2_going_up.reverse_piece is None
-    assert p2_going_up.reverse_connection is None
+def test_reverse_connection_not_found() -> None:
+    p1, p2 = Piece.create_line(Position(0, 0), RIGHT, 2)
+    Grid(pieces=[p1, p2])
+    assert p1.connection(LEFT).reverse_connection is None
 
-    assert p2_going_down.forward_direction is DOWN
-    assert p2_going_down.forward_position == Position(2, 0)
-    assert p2_going_down.forward_piece is None
-    assert p2_going_down.forward_connection is None
 
-    assert p2_going_down.reverse_direction is UP
-    assert p2_going_down.reverse_position == p1.position
-    assert p2_going_down.reverse_piece is p1
-    assert p2_going_down.reverse_connection is p1_going_up
+def test_reverse_connection_trailing_switch() -> None:
+    # a switch that joins LEFT and UP to RIGHT, but only goes RIGHT to UP
+    p1_left_to_right = Connection(LEFT, RIGHT)
+    p1_up_to_right = Connection(UP, RIGHT)
+    p1_right_to_up = Connection(RIGHT, UP)
+    p1 = Piece(Position(0, 0), connections=[p1_left_to_right, p1_up_to_right, p1_right_to_up])
+    p2 = Piece.create(Position(0, 1), LEFT, RIGHT)
+    Grid(pieces=[p1, p2])
+    # If we go backwards from p2 LEFT-RIGHT, we should end up on p1 UP-RIGHT,
+    # since that's how the switch is pointed.
+    assert p2.connection(LEFT).reverse_connection is p1_up_to_right
+
+
+def test_reverse_connection_unidirectional() -> None:
+    # A derailer - goes one way but not the other.
+    p1_left_to_right = Connection(LEFT, RIGHT)
+    p1 = Piece(Position(0, 0), connections=[p1_left_to_right])
+    p2 = Piece.create(Position(0, 1), LEFT, RIGHT)
+    Grid(pieces=[p1, p2])
+    # If we go backwards from p2 LEFT-RIGHT, we can't get back that way since there's no
+    # entrance to p1 from the RIGHT, even though we're facing RIGHT.
+    assert p2.connection(LEFT).reverse_connection is None

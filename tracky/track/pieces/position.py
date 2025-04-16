@@ -13,25 +13,25 @@ class Position(Errorable):
     u: float
 
     def __add__(self, du: float) -> "Position":
-        print(f"adding {du} to {self}")
+        connection = self.connection
         u = self.u + du
-        if u > 1:
-            print(f"u > 1: {u}")
+        print(f"moving {du} from {self.u} to {u} at {connection}")
+        while u >= 1:
+            print(f"moving forward from {u} at {connection}")
             u -= 1
-            print(f"u -= 1: {u}")
-            if (forward_connection := self.connection.forward_connection) is None:
+            if (forward_connection := connection.forward_connection) is None:
                 raise self._error("no forward connection", self.ValueError)
-            print(f"forward connection: {forward_connection}")
-            return Position(forward_connection, u)
-        elif u < 0:
-            print(f"u < 0: {u}")
+            connection = forward_connection
+            print(f"moved forward to {u} at {connection}")
+        while u < 0:
+            print(f"moving backward from {u} at {connection}")
             u += 1
-            print(f"u += 1: {u}")
-            if (reverse_connection := self.connection.reverse_connection) is None:
+            if (reverse_connection := connection.reverse_connection) is None:
                 raise self._error("no reverse connection", self.ValueError)
-            return Position(reverse_connection, u)
-        else:
-            return Position(self.connection, u)
+            connection = reverse_connection
+            print(f"moved backward to {u} at {connection}")
+        print(f"moved to {u} at {connection}")
+        return Position(connection, u)
 
     def __sub__(self, du: float) -> "Position":
         return self + (-du)

@@ -54,8 +54,31 @@ class Connection(Validatable):
 
     @property
     def reverse_connection(self) -> Optional["Connection"]:
+        """Get the connection for reversing from this connection.
+
+        Note that this isn't necessarily the connection that got you to this connection.
+        Consider a trailing switch with connections LEFT-RIGHT UP-RIGHT and RIGHT-UP. You
+        traverse that switch going LEFT-RIGHT and get one piece beyond, then back up u=1.
+        You'll end up on the RIGHT-UP connection even though you didn't come from there.
+
+        Note that this preserves directionality. You aren't going backwards the other way.
+        You want to end up on a connection that has the same direction as the one you're
+        currently pointed in.
+        """
+        # Get the piece we came from, always the same.
         if reverse_piece := self.reverse_piece:
-            return reverse_piece.connection(-self.reverse_direction)
+            # Get the connection we would go over if we were going the opposite
+            # direction.
+            if incoming_connection := reverse_piece.connections_by_direction.get(
+                -self.reverse_direction
+            ):
+                # Get the complimentary connection to that, which is the connection we
+                # would end up on if we were going backwards. Note that this doesn't
+                # have to exist. Some pieces can be directional, like a derailer or a
+                # signal. That's ok and representable.
+                return reverse_piece.connections_by_direction.get(
+                    incoming_connection.forward_direction
+                )
 
     @property
     def forward_direction(self) -> Direction:

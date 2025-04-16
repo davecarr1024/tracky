@@ -1,5 +1,6 @@
 {pkgs}: {
   deps = [
+    pkgs.python312Packages.docformatter
     pkgs.watchexec
     pkgs.pyright
     pkgs.ruff

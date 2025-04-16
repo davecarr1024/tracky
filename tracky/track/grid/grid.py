@@ -59,9 +59,7 @@ class Grid(Validatable, MutableMapping[Position, "piece.Piece"]):
             pieces_by_position[piece_.position].add(piece_)
         for position, pieces in pieces_by_position.items():
             if len(pieces) > 1:
-                raise self._validation_error(
-                    f"multiple pieces at position {position}: {pieces}"
-                )
+                raise self._validation_error(f"multiple pieces at position {position}: {pieces}")
 
     @property
     def pieces_by_position(self) -> Mapping[Position, "piece.Piece"]:

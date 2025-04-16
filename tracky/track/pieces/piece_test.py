@@ -113,9 +113,9 @@ def assert_piece_is(
     connections: Iterable[tuple[Direction, Direction]],
 ) -> None:
     assert piece.position == position
-    assert {
-        (c.reverse_direction, c.forward_direction) for c in piece.connections
-    } == set(connections)
+    assert {(c.reverse_direction, c.forward_direction) for c in piece.connections} == set(
+        connections
+    )
 
 
 def test_create() -> None:

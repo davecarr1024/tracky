@@ -92,17 +92,13 @@ class Piece(Validatable):
 
     @property
     def connections_by_direction(self) -> Mapping[Direction, Connection]:
-        return {
-            connection.reverse_direction: connection for connection in self.connections
-        }
+        return {connection.reverse_direction: connection for connection in self.connections}
 
     def connection(self, direction: Direction) -> Connection:
         try:
             return self.connections_by_direction[direction]
         except KeyError as e:
-            raise self.KeyError(
-                f"no connection for direction {direction} in piece {self}"
-            ) from e
+            raise self.KeyError(f"no connection for direction {direction} in piece {self}") from e
 
     def reverse_position(self, direction: Direction) -> Optional[Position]:
         if connection := self.connection(direction):
