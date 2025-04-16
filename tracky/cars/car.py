@@ -1,22 +1,46 @@
-from typing import Optional
+from typing import Optional, override
 
+from tracky.core import Validatable
 from tracky.track import Connection, Grid, GridPosition, Piece, TrackPosition
 
 
-class Car:
+class Car(Validatable):
     def __init__(
         self,
         position: TrackPosition,
         length: float = 1,
         mass: float = 1,
         velocity_damping: float = -0.1,
+        manager: Optional["car_manager.CarManager"] = None,
     ) -> None:
+        super().__init__()
         self.__position = position
         self.__length = length
         self.__mass = mass
         self.__velocity: float = 0
         self.__force: float = 0
         self.__velocity_damping = velocity_damping
+        self.__manager: Optional[car_manager.CarManager] = None
+        with self._pause_validation():
+            self.manager = manager
+
+    @override
+    def __eq__(self, other: object) -> bool:
+        return other is self
+
+    @override
+    def __hash__(self) -> int:
+        return id(self)
+
+    @override
+    def __repr__(self) -> str:
+        return (
+            f"Car(position={self.__position}, "
+            f"length={self.__length}, "
+            f"mass={self.__mass}, "
+            f"velocity_damping={self.__velocity_damping}, "
+            f"velocity={self.__velocity})"
+        )
 
     @property
     def position(self) -> TrackPosition:
@@ -91,3 +115,25 @@ class Car:
         self.apply_impulse(self.__force * dt)
         self.__force = 0
         self.advance(self.__velocity * dt)
+
+    @property
+    def manager(self) -> Optional["car_manager.CarManager"]:
+        return self.__manager
+
+    @manager.setter
+    def manager(self, manager: Optional["car_manager.CarManager"]) -> None:
+        if manager is not self.__manager:
+            with self._pause_validation():
+                if self.__manager is not None:
+                    self.__manager.remove_car(self)
+                self.__manager = manager
+                if self.__manager is not None:
+                    self.__manager.add_car(self)
+
+    @override
+    def _validate(self) -> None:
+        if self.__manager is not None and self not in self.__manager.cars:
+            raise self._validation_error(f"not in manager {self.__manager}")
+
+
+from tracky.cars import car_manager

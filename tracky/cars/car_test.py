@@ -1,6 +1,7 @@
+import pytest
 from pytest import approx  # type:ignore
 
-from tracky.cars import Car
+from tracky.cars import Car, CarManager
 from tracky.track import LEFT, RIGHT, Connection, Grid, GridPosition, Piece, TrackPosition
 
 
@@ -111,3 +112,54 @@ def test_ends_long() -> None:
         TrackPosition(p1.connection(LEFT), 0.5),
         TrackPosition(p3.connection(LEFT), 0.5),
     )
+
+
+def test_ctor_manager() -> None:
+    p = Piece.create(GridPosition(0, 0), LEFT, RIGHT)
+    Grid(pieces=[p])
+    pos = TrackPosition(p.connection(LEFT), 0.5)
+    manager = CarManager()
+    car = Car(pos, manager=manager)
+    assert car.manager is manager
+    assert car in manager
+
+
+def test_set_manager() -> None:
+    p = Piece.create(GridPosition(0, 0), LEFT, RIGHT)
+    Grid(pieces=[p])
+    pos = TrackPosition(p.connection(LEFT), 0.5)
+    manager = CarManager()
+    car = Car(pos)
+    assert car.manager is None
+    assert car not in manager
+    car.manager = manager
+    assert car.manager is manager
+    assert car in manager
+    car.manager = None
+    assert car.manager is None
+    assert car not in manager
+
+
+def test_eq() -> None:
+    p = Piece.create(GridPosition(0, 0), LEFT, RIGHT)
+    Grid(pieces=[p])
+    pos = TrackPosition(p.connection(LEFT), 0.5)
+    car = Car(pos)
+    assert car == car
+    assert car != Car(pos)
+    assert hash(car) == hash(car)
+    assert hash(car) != hash(Car(pos))
+
+
+def test_invalid_manager() -> None:
+    p = Piece.create(GridPosition(0, 0), LEFT, RIGHT)
+    Grid(pieces=[p])
+    pos = TrackPosition(p.connection(LEFT), 0.5)
+    manager = CarManager()
+    car = Car(pos, manager=manager)
+    with (
+        pytest.raises(Car.ValidationError),
+        manager._pause_validation(),  # type:ignore
+        car._pause_validation(),  # type:ignore
+    ):
+        manager._CarManager__cars = frozenset[Car]()  # type:ignore
