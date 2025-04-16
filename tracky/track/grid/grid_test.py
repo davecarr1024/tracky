@@ -146,3 +146,19 @@ def test_debug_print_unknown_piece_char() -> None:
     p = Piece(Position(0, 0))
     grid = Grid(pieces={p})
     assert grid.debug_print() == "?\n"
+
+
+def test_bounds() -> None:
+    grid = Grid(
+        pieces={
+            Piece(Position(0, 1)),
+            Piece(Position(0, -1)),
+            Piece(Position(1, 0)),
+            Piece(Position(-1, 0)),
+        }
+    )
+    assert grid.bounds == (Position(-1, -1), Position(1, 1))
+
+
+def test_bounds_empty() -> None:
+    assert Grid().bounds == (Position(0, 0), Position(0, 0))

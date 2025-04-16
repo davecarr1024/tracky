@@ -211,5 +211,13 @@ class Grid(Validatable, MutableMapping[Position, "piece.Piece"]):
             s += "\n"
         return s
 
+    @property
+    def bounds(self) -> tuple[Position, Position]:
+        if len(self) == 0:
+            return (Position(0, 0), Position(0, 0))
+        rows = {piece.position.row for piece in self.pieces}
+        cols = {piece.position.col for piece in self.pieces}
+        return Position(min(rows), min(cols)), Position(max(rows), max(cols))
+
 
 from tracky.track.pieces import piece
