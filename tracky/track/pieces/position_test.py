@@ -2,8 +2,8 @@ import pytest
 
 from tracky.track.grid import LEFT, RIGHT, Grid
 from tracky.track.grid import Position as GridPosition
-from tracky.track.piece import Piece
-from tracky.track.piece import Position as TrackPosition
+from tracky.track.pieces import Piece
+from tracky.track.pieces import Position as TrackPosition
 
 
 def test_get_piece() -> None:

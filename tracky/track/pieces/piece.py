@@ -4,7 +4,7 @@ from typing import Iterable, Mapping, Optional, override
 from tracky.core import Error, Validatable
 from tracky.track.grid.direction import Direction
 from tracky.track.grid.position import Position
-from tracky.track.piece.connection import Connection
+from tracky.track.pieces.connection import Connection
 
 
 class Piece(Validatable):

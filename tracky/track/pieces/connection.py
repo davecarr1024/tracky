@@ -106,4 +106,4 @@ class Connection(Validatable):
 
 
 from tracky.track.grid import grid as grid_lib
-from tracky.track.piece import piece
+from tracky.track.pieces import piece

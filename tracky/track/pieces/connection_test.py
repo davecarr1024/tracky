@@ -1,7 +1,7 @@
 import pytest
 
 from tracky.track.grid import DOWN, UP, Grid, Position
-from tracky.track.piece import Connection, Piece
+from tracky.track.pieces import Connection, Piece
 
 
 def test_ctor_no_piece() -> None:

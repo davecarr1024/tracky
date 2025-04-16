@@ -93,4 +93,4 @@ class Grid(Validatable, MutableMapping[Position, "piece.Piece"]):
         self.remove_piece(self[position])
 
 
-from tracky.track.piece import piece
+from tracky.track.pieces import piece

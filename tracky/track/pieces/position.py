@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from tracky.core import Error, Errorable
-from tracky.track.piece import Connection, Piece
+from tracky.track.pieces import Connection, Piece
 
 
 @dataclass(frozen=True)
