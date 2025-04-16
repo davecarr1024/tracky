@@ -2,6 +2,7 @@ from collections import defaultdict
 from typing import Iterable, Iterator, Mapping, MutableMapping, Optional, override
 
 from tracky.core import Error, Validatable
+from tracky.track.grid.direction import DOWN, LEFT, RIGHT, UP, Direction
 from tracky.track.grid.position import Position
 
 
@@ -89,6 +90,126 @@ class Grid(Validatable, MutableMapping[Position, "piece.Piece"]):
     @override
     def __delitem__(self, position: Position) -> None:
         self.remove_piece(self[position])
+
+    @classmethod
+    def create_loop(
+        cls,
+        rows: int,
+        cols: int,
+        start_position: Optional[Position] = None,
+    ) -> "Grid":
+        start_position_ = start_position if start_position is not None else Position(0, 0)
+        start_row = start_position_.row
+        start_col = start_position_.col
+        top = start_row
+        bottom = start_col + cols - 1
+        left = start_col
+        right = start_row + rows - 1
+        return Grid(
+            pieces=set[piece.Piece].union(
+                {
+                    piece.Piece.create(
+                        Position(row, left),
+                        UP,
+                        DOWN,
+                    )
+                    for row in range(top + 1, bottom)
+                },
+                {
+                    piece.Piece.create(
+                        Position(row, right),
+                        UP,
+                        DOWN,
+                    )
+                    for row in range(top + 1, bottom)
+                },
+                {
+                    piece.Piece.create(
+                        Position(top, col),
+                        LEFT,
+                        RIGHT,
+                    )
+                    for col in range(left + 1, right)
+                },
+                {
+                    piece.Piece.create(
+                        Position(bottom, col),
+                        LEFT,
+                        RIGHT,
+                    )
+                    for col in range(left + 1, right)
+                },
+                {
+                    piece.Piece.create(
+                        Position(top, left),
+                        DOWN,
+                        RIGHT,
+                    ),
+                    piece.Piece.create(
+                        Position(top, right),
+                        LEFT,
+                        DOWN,
+                    ),
+                    piece.Piece.create(
+                        Position(bottom, right),
+                        UP,
+                        LEFT,
+                    ),
+                    piece.Piece.create(
+                        Position(bottom, left),
+                        UP,
+                        RIGHT,
+                    ),
+                },
+            )
+        )
+
+    def debug_print(self) -> str:
+        rows = {piece.position.row for piece in self.pieces}
+        cols = {piece.position.col for piece in self.pieces}
+        top = min(rows)
+        bottom = max(rows)
+        left = min(cols)
+        right = max(cols)
+        s = ""
+
+        def piece_is(
+            piece_: piece.Piece,
+            reverse_direction: Direction,
+            forward_direction: Direction,
+        ) -> bool:
+            return {
+                (connection.reverse_direction, connection.forward_direction)
+                for connection in piece_.connections
+            } == {
+                (reverse_direction, forward_direction),
+                (forward_direction, reverse_direction),
+            }
+
+        def piece_char(piece_: piece.Piece) -> str:
+            if piece_is(piece_, UP, DOWN):
+                return "|"
+            elif piece_is(piece_, LEFT, RIGHT):
+                return "-"
+            elif piece_is(piece_, UP, LEFT):
+                return "┘"
+            elif piece_is(piece_, UP, RIGHT):
+                return "└"
+            elif piece_is(piece_, DOWN, LEFT):
+                return "┐"
+            elif piece_is(piece_, DOWN, RIGHT):
+                return "┌"
+            else:
+                return "?"
+
+        for row in range(top, bottom + 1):
+            for col in range(left, right + 1):
+                if piece_ := self.get(Position(row, col)):
+                    s += piece_char(piece_)
+                else:
+                    s += " "
+            s += "\n"
+        return s
 
 
 from tracky.track.pieces import piece

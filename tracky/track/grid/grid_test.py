@@ -127,3 +127,22 @@ def test_duplicate_piece_positions() -> None:
     piece2 = Piece(Position(0, 0))
     with pytest.raises(Grid.ValidationError):
         Grid(pieces={piece1, piece2})
+
+
+def test_create_loop() -> None:
+    grid = Grid.create_loop(3, 3)
+    assert len(grid) == 8
+    assert (
+        grid.debug_print().strip()
+        == """
+┌-┐
+| |
+└-┘
+    """.strip()
+    )
+
+
+def test_debug_print_unknown_piece_char() -> None:
+    p = Piece(Position(0, 0))
+    grid = Grid(pieces={p})
+    assert grid.debug_print() == "?\n"

@@ -12,7 +12,7 @@ class Direction:
     drow: int
     dcol: int
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         match (self.drow, self.dcol):
             case (0, 1):
                 return "RIGHT"

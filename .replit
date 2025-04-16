@@ -1,3 +1,28 @@
 modules = ["python-base-3.13"]
 [nix]
 channel = "stable-24_05"
+
+[workflows]
+runButton = "render_test"
+
+[[workflows.workflow]]
+name = "render_test"
+mode = "sequential"
+author = 26393
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "test"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "poetry run render_test"
+
+[[workflows.workflow]]
+name = "test"
+mode = "sequential"
+author = 26393
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "poe all"
