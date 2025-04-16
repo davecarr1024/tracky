@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-for file in $(find tracky -name *.py)
+for file in $(find tracky -name *.py) $(find scripts -name *.py)
 do 
     echo 
     echo \# $file

@@ -77,4 +77,4 @@ exclude_lines = [
 ]
 
 [tool.poetry.scripts]
-render_test = "tracky.visuals.render_test:main"
+render_test = "scripts.render_test:main"
