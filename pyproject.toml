@@ -6,6 +6,10 @@ authors = ["Dave Carr <davecarr1024@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.13"
+pygame = "^2.6.1"
+
+[tool.poetry.group.dev.dependencies]
+poethepoet = "^0.33.1"
 black = "^25.1.0"
 pytest = "^8.3.5"
 pytest-cov = "^4.0.0"
@@ -13,7 +17,6 @@ pytest-subtests = "^0.14.1"
 pytest-repeat = "^0.9.3"
 pyright = "^1.1.398"
 ruff = "^0.11.3"
-pygame = "^2.6.1"
 
 [tool.black]
 line-length = 100
