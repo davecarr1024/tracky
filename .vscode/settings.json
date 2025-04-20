@@ -23,4 +23,7 @@
     "**/.mypy_cache": true,
     "**/.coverage": true,
   },
+  "python.analysis.autoFormatStrings": true,
+  "python.analysis.diagnosticMode": "workspace",
+  "python.analysis.diagnosticsSource": "Pyright",
 }

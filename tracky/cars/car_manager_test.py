@@ -2,7 +2,7 @@ import pytest
 from pytest import approx  # type: ignore
 
 from tracky.cars import Car, CarManager
-from tracky.track import LEFT, RIGHT, Grid, GridPosition, Piece, TrackPosition
+from tracky.track import Direction, Grid, GridPosition, Piece, TrackPosition
 
 
 def test_ctor_empty() -> None:
@@ -12,9 +12,9 @@ def test_ctor_empty() -> None:
 
 
 def test_ctor_cars() -> None:
-    p = Piece.create(GridPosition(0, 0), LEFT, RIGHT)
+    p = Piece.create(GridPosition(0, 0), Direction.LEFT, Direction.RIGHT)
     Grid(pieces=[p])
-    pos = TrackPosition(p.connection(LEFT), 0)
+    pos = TrackPosition(p.connection(Direction.LEFT), 0)
     car = Car(pos)
     manager = CarManager(cars=[car])
     assert manager.cars == {car}
@@ -32,9 +32,9 @@ def test_eq() -> None:
 
 def test_set_cars() -> None:
     manager = CarManager()
-    p = Piece.create(GridPosition(0, 0), LEFT, RIGHT)
+    p = Piece.create(GridPosition(0, 0), Direction.LEFT, Direction.RIGHT)
     Grid(pieces=[p])
-    pos = TrackPosition(p.connection(LEFT), 0)
+    pos = TrackPosition(p.connection(Direction.LEFT), 0)
     car = Car(pos)
     assert manager.cars == set()
     assert car.manager is None
@@ -47,9 +47,9 @@ def test_set_cars() -> None:
 
 
 def test_update() -> None:
-    p = Piece.create(GridPosition(0, 0), LEFT, RIGHT)
+    p = Piece.create(GridPosition(0, 0), Direction.LEFT, Direction.RIGHT)
     Grid(pieces=[p])
-    pos = TrackPosition(p.connection(LEFT), 0)
+    pos = TrackPosition(p.connection(Direction.LEFT), 0)
     car = Car(pos, velocity_damping=0)
     manager = CarManager(cars=[car])
     assert car.u == 0
@@ -59,9 +59,9 @@ def test_update() -> None:
 
 
 def test_invalid_car() -> None:
-    p = Piece.create(GridPosition(0, 0), LEFT, RIGHT)
+    p = Piece.create(GridPosition(0, 0), Direction.LEFT, Direction.RIGHT)
     Grid(pieces=[p])
-    pos = TrackPosition(p.connection(LEFT), 0)
+    pos = TrackPosition(p.connection(Direction.LEFT), 0)
     car = Car(pos)
     manager = CarManager(cars=[car])
     with (
@@ -75,9 +75,9 @@ def test_invalid_car() -> None:
 def test_len() -> None:
     manager = CarManager()
     assert len(manager) == 0
-    p = Piece.create(GridPosition(0, 0), LEFT, RIGHT)
+    p = Piece.create(GridPosition(0, 0), Direction.LEFT, Direction.RIGHT)
     Grid(pieces=[p])
-    pos = TrackPosition(p.connection(LEFT), 0)
+    pos = TrackPosition(p.connection(Direction.LEFT), 0)
     car = Car(pos)
     manager.add_car(car)
     assert len(manager) == 1

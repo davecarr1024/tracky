@@ -1,44 +1,25 @@
-from dataclasses import dataclass
+from enum import Enum
 
-from tracky.core.error import Error
+from tracky.core import Errorable
 
 
-@dataclass(frozen=True)
-class Direction:
-    class Error(Error): ...
+class Direction(Errorable, Enum):
+    UP = (-1, 0)
+    DOWN = (1, 0)
+    LEFT = (0, -1)
+    RIGHT = (0, 1)
 
-    class ValueError(Error, ValueError): ...
-
-    drow: int
-    dcol: int
-
-    def __repr__(self) -> str:
-        match (self.drow, self.dcol):
-            case (0, 1):
-                return "RIGHT"
-            case (0, -1):
-                return "LEFT"
-            case (1, 0):
-                return "DOWN"
-            case (-1, 0):
-                return "UP"
-            case _:
-                raise self.ValueError(f"Invalid direction: {self.drow}, {self.dcol}")
-
-    def __post_init__(self) -> None:
-        if (self.drow, self.dcol) not in (
-            (0, 1),
-            (0, -1),
-            (1, 0),
-            (-1, 0),
-        ):
-            raise self.ValueError(f"Invalid direction: {self.drow}, {self.dcol}")
+    def __init__(self, drow: int, dcol: int):
+        self.drow = drow
+        self.dcol = dcol
 
     def __neg__(self) -> "Direction":
-        return Direction(-self.drow, -self.dcol)
-
-
-UP = Direction(-1, 0)
-DOWN = Direction(1, 0)
-LEFT = Direction(0, -1)
-RIGHT = Direction(0, 1)
+        match self:
+            case Direction.LEFT:
+                return Direction.RIGHT
+            case Direction.UP:
+                return Direction.DOWN
+            case Direction.RIGHT:
+                return Direction.LEFT
+            case Direction.DOWN:
+                return Direction.UP

@@ -1,6 +1,6 @@
 from tracky.cars import Car, CarManager
 from tracky.sim import Sim
-from tracky.track import LEFT, RIGHT, Grid, GridPosition, Piece, TrackPosition
+from tracky.track import Direction, Grid, GridPosition, Piece, TrackPosition
 
 
 def test_ctor() -> None:
@@ -22,9 +22,9 @@ def test_eq() -> None:
 
 
 def test_update() -> None:
-    p = Piece.create(GridPosition(0, 0), LEFT, RIGHT)
+    p = Piece.create(GridPosition(0, 0), Direction.LEFT, Direction.RIGHT)
     grid = Grid(pieces=[p])
-    car = Car(TrackPosition(p.connection(LEFT), 0), velocity_damping=0)
+    car = Car(TrackPosition(p.connection(Direction.LEFT), 0), velocity_damping=0)
     car_manager = CarManager(cars=[car])
     sim = Sim(grid, car_manager)
     car.apply_impulse(1)

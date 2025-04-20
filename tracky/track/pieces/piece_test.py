@@ -2,7 +2,7 @@ from typing import Iterable
 
 import pytest
 
-from tracky.track.grid import DOWN, LEFT, RIGHT, UP, Direction, Grid, Position
+from tracky.track.grid import Direction, Grid, Position
 from tracky.track.pieces import Connection, Piece
 
 
@@ -22,7 +22,7 @@ def test_ctor_grid() -> None:
 
 
 def test_ctor_connections() -> None:
-    connection = Connection(UP, DOWN)
+    connection = Connection(Direction.UP, Direction.DOWN)
     piece = Piece(Position(0, 0), connections={connection})
     assert piece.connections == {connection}
     assert piece.grid is None
@@ -65,46 +65,46 @@ def test_invalid_grid() -> None:
 
 
 def test_duplicate_from_directions() -> None:
-    connection1 = Connection(UP, DOWN)
-    connection2 = Connection(UP, RIGHT)
+    connection1 = Connection(Direction.UP, Direction.DOWN)
+    connection2 = Connection(Direction.UP, Direction.RIGHT)
     with pytest.raises(Piece.ValidationError):
         Piece(Position(0, 0), connections={connection1, connection2})
 
 
 def test_connection() -> None:
-    c = Connection(UP, DOWN)
+    c = Connection(Direction.UP, Direction.DOWN)
     piece = Piece(Position(0, 0), connections={c})
-    assert piece.connection(UP) is c
+    assert piece.connection(Direction.UP) is c
     with pytest.raises(Piece.KeyError):
-        piece.connection(DOWN)
+        piece.connection(Direction.DOWN)
 
 
 def test_reverse_position() -> None:
-    piece = Piece(Position(0, 0), connections={Connection(UP, DOWN)})
-    assert piece.reverse_position(UP) == Position(-1, 0)
+    piece = Piece(Position(0, 0), connections={Connection(Direction.UP, Direction.DOWN)})
+    assert piece.reverse_position(Direction.UP) == Position(-1, 0)
 
 
 def test_reverse_piece() -> None:
-    piece = Piece(Position(0, 0), connections={Connection(UP, DOWN)})
+    piece = Piece(Position(0, 0), connections={Connection(Direction.UP, Direction.DOWN)})
     grid = Grid(pieces={piece})
-    assert piece.reverse_piece(UP) is None
+    assert piece.reverse_piece(Direction.UP) is None
     piece2 = Piece(Position(-1, 0))
     grid.add_piece(piece2)
-    assert piece.reverse_piece(UP) is piece2
+    assert piece.reverse_piece(Direction.UP) is piece2
 
 
 def test_forward_position() -> None:
-    piece = Piece(Position(0, 0), connections={Connection(UP, DOWN)})
-    assert piece.forward_position(UP) == Position(1, 0)
+    piece = Piece(Position(0, 0), connections={Connection(Direction.UP, Direction.DOWN)})
+    assert piece.forward_position(Direction.UP) == Position(1, 0)
 
 
 def test_forward_piece() -> None:
-    piece = Piece(Position(0, 0), connections={Connection(UP, DOWN)})
+    piece = Piece(Position(0, 0), connections={Connection(Direction.UP, Direction.DOWN)})
     grid = Grid(pieces={piece})
-    assert piece.forward_piece(UP) is None
+    assert piece.forward_piece(Direction.UP) is None
     piece2 = Piece(Position(1, 0))
     grid.add_piece(piece2)
-    assert piece.forward_piece(UP) is piece2
+    assert piece.forward_piece(Direction.UP) is piece2
 
 
 def assert_piece_is(
@@ -119,11 +119,17 @@ def assert_piece_is(
 
 
 def test_create() -> None:
-    p = Piece.create(Position(0, 0), UP, DOWN)
-    assert_piece_is(p, Position(0, 0), {(UP, DOWN), (DOWN, UP)})
+    p = Piece.create(Position(0, 0), Direction.UP, Direction.DOWN)
+    assert_piece_is(
+        p, Position(0, 0), {(Direction.UP, Direction.DOWN), (Direction.DOWN, Direction.UP)}
+    )
 
 
 def test_create_line() -> None:
-    line = list(Piece.create_line(Position(0, 0), RIGHT, 3))
+    line = list(Piece.create_line(Position(0, 0), Direction.RIGHT, 3))
     for i in range(3):
-        assert_piece_is(line[i], Position(0, i), {(LEFT, RIGHT), (RIGHT, LEFT)})
+        assert_piece_is(
+            line[i],
+            Position(0, i),
+            {(Direction.LEFT, Direction.RIGHT), (Direction.RIGHT, Direction.LEFT)},
+        )

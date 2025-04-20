@@ -1,6 +1,24 @@
 from pytest_subtests import SubTests
 
-from tracky.track.grid import DOWN, LEFT, RIGHT, UP, Direction, Rotation
+from tracky.track.grid import Direction, Rotation
+
+
+def test_neg() -> None:
+    assert -Rotation(2) == Rotation(2)
+
+
+def test_add() -> None:
+    assert Rotation(1) + Rotation(2) == Rotation(3)
+
+
+def test_sub() -> None:
+    assert Rotation(3) - Rotation(2) == Rotation(1)
+
+
+def test_ctor_mod() -> None:
+    assert Rotation(1) == Rotation(1)
+    assert Rotation(5) == Rotation(1)
+    assert Rotation(-3) == Rotation(1)
 
 
 def test_mul(subtests: SubTests) -> None:
@@ -14,83 +32,83 @@ def test_mul(subtests: SubTests) -> None:
         [
             (
                 Rotation(0),
-                LEFT,
-                LEFT,
+                Direction.LEFT,
+                Direction.LEFT,
             ),
             (
                 Rotation(0),
-                UP,
-                UP,
+                Direction.UP,
+                Direction.UP,
             ),
             (
                 Rotation(0),
-                RIGHT,
-                RIGHT,
+                Direction.RIGHT,
+                Direction.RIGHT,
             ),
             (
                 Rotation(0),
-                DOWN,
-                DOWN,
+                Direction.DOWN,
+                Direction.DOWN,
             ),
             (
                 Rotation(1),
-                LEFT,
-                UP,
+                Direction.LEFT,
+                Direction.UP,
             ),
             (
                 Rotation(1),
-                UP,
-                RIGHT,
+                Direction.UP,
+                Direction.RIGHT,
             ),
             (
                 Rotation(1),
-                RIGHT,
-                DOWN,
+                Direction.RIGHT,
+                Direction.DOWN,
             ),
             (
                 Rotation(2),
-                DOWN,
-                UP,
+                Direction.DOWN,
+                Direction.UP,
             ),
             (
                 Rotation(2),
-                LEFT,
-                RIGHT,
+                Direction.LEFT,
+                Direction.RIGHT,
             ),
             (
                 Rotation(2),
-                UP,
-                DOWN,
+                Direction.UP,
+                Direction.DOWN,
             ),
             (
                 Rotation(2),
-                RIGHT,
-                LEFT,
+                Direction.RIGHT,
+                Direction.LEFT,
             ),
             (
                 Rotation(2),
-                DOWN,
-                UP,
+                Direction.DOWN,
+                Direction.UP,
             ),
             (
                 Rotation(3),
-                LEFT,
-                DOWN,
+                Direction.LEFT,
+                Direction.DOWN,
             ),
             (
                 Rotation(3),
-                UP,
-                LEFT,
+                Direction.UP,
+                Direction.LEFT,
             ),
             (
                 Rotation(3),
-                RIGHT,
-                UP,
+                Direction.RIGHT,
+                Direction.UP,
             ),
             (
                 Rotation(3),
-                DOWN,
-                RIGHT,
+                Direction.DOWN,
+                Direction.RIGHT,
             ),
         ]
     ):

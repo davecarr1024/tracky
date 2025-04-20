@@ -2,7 +2,7 @@ from collections import defaultdict
 from typing import Iterable, Iterator, Mapping, MutableMapping, Optional, override
 
 from tracky.core import Error, Validatable
-from tracky.track.grid.direction import DOWN, LEFT, RIGHT, UP, Direction
+from tracky.track.grid.direction import Direction
 from tracky.track.grid.position import Position
 
 
@@ -110,55 +110,55 @@ class Grid(Validatable, MutableMapping[Position, "piece.Piece"]):
                 {
                     piece.Piece.create(
                         Position(row, left),
-                        UP,
-                        DOWN,
+                        Direction.UP,
+                        Direction.DOWN,
                     )
                     for row in range(top + 1, bottom)
                 },
                 {
                     piece.Piece.create(
                         Position(row, right),
-                        UP,
-                        DOWN,
+                        Direction.UP,
+                        Direction.DOWN,
                     )
                     for row in range(top + 1, bottom)
                 },
                 {
                     piece.Piece.create(
                         Position(top, col),
-                        LEFT,
-                        RIGHT,
+                        Direction.LEFT,
+                        Direction.RIGHT,
                     )
                     for col in range(left + 1, right)
                 },
                 {
                     piece.Piece.create(
                         Position(bottom, col),
-                        LEFT,
-                        RIGHT,
+                        Direction.LEFT,
+                        Direction.RIGHT,
                     )
                     for col in range(left + 1, right)
                 },
                 {
                     piece.Piece.create(
                         Position(top, left),
-                        DOWN,
-                        RIGHT,
+                        Direction.DOWN,
+                        Direction.RIGHT,
                     ),
                     piece.Piece.create(
                         Position(top, right),
-                        LEFT,
-                        DOWN,
+                        Direction.LEFT,
+                        Direction.DOWN,
                     ),
                     piece.Piece.create(
                         Position(bottom, right),
-                        UP,
-                        LEFT,
+                        Direction.UP,
+                        Direction.LEFT,
                     ),
                     piece.Piece.create(
                         Position(bottom, left),
-                        UP,
-                        RIGHT,
+                        Direction.UP,
+                        Direction.RIGHT,
                     ),
                 },
             )
@@ -187,17 +187,17 @@ class Grid(Validatable, MutableMapping[Position, "piece.Piece"]):
             }
 
         def piece_char(piece_: piece.Piece) -> str:
-            if piece_is(piece_, UP, DOWN):
+            if piece_is(piece_, Direction.UP, Direction.DOWN):
                 return "|"
-            elif piece_is(piece_, LEFT, RIGHT):
+            elif piece_is(piece_, Direction.LEFT, Direction.RIGHT):
                 return "-"
-            elif piece_is(piece_, UP, LEFT):
+            elif piece_is(piece_, Direction.UP, Direction.LEFT):
                 return "┘"
-            elif piece_is(piece_, UP, RIGHT):
+            elif piece_is(piece_, Direction.UP, Direction.RIGHT):
                 return "└"
-            elif piece_is(piece_, DOWN, LEFT):
+            elif piece_is(piece_, Direction.DOWN, Direction.LEFT):
                 return "┐"
-            elif piece_is(piece_, DOWN, RIGHT):
+            elif piece_is(piece_, Direction.DOWN, Direction.RIGHT):
                 return "┌"
             else:
                 return "?"

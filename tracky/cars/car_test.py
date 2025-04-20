@@ -2,17 +2,17 @@ import pytest
 from pytest import approx  # type:ignore
 
 from tracky.cars import Car, CarManager
-from tracky.track import LEFT, RIGHT, Connection, Grid, GridPosition, Piece, TrackPosition
+from tracky.track import Connection, Direction, Grid, GridPosition, Piece, TrackPosition
 
 
 def test_ctor() -> None:
-    c = Connection(LEFT, RIGHT)
+    c = Connection(Direction.LEFT, Direction.RIGHT)
     p = Piece(GridPosition(0, 0), connections={c})
     grid = Grid(pieces=[p])
-    pos = TrackPosition(p.connection(LEFT), 0.5)
+    pos = TrackPosition(p.connection(Direction.LEFT), 0.5)
     car = Car(pos, length=2, mass=3, velocity_damping=-1)
     assert car.position == pos
-    assert car.connection is p.connection(LEFT)
+    assert car.connection is p.connection(Direction.LEFT)
     assert car.piece is p
     assert car.grid is grid
     assert car.grid_position == GridPosition(0, 0)
@@ -23,9 +23,9 @@ def test_ctor() -> None:
 
 
 def test_set_u() -> None:
-    p1, p2 = Piece.create_line(GridPosition(0, 0), RIGHT, 2)
+    p1, p2 = Piece.create_line(GridPosition(0, 0), Direction.RIGHT, 2)
     Grid(pieces=[p1, p2])
-    car = Car(TrackPosition(p1.connection(LEFT), 0.5))
+    car = Car(TrackPosition(p1.connection(Direction.LEFT), 0.5))
     assert car.piece is p1
     assert car.u == 0.5
     car.u += 1
@@ -37,9 +37,9 @@ def test_set_u() -> None:
 
 
 def test_apply_force() -> None:
-    p1, p2 = Piece.create_line(GridPosition(0, 0), RIGHT, 2)
+    p1, p2 = Piece.create_line(GridPosition(0, 0), Direction.RIGHT, 2)
     Grid(pieces=[p1, p2])
-    car = Car(TrackPosition(p1.connection(LEFT), 0.5), velocity_damping=0)
+    car = Car(TrackPosition(p1.connection(Direction.LEFT), 0.5), velocity_damping=0)
     assert car.velocity == 0
     assert car.u == 0.5
     assert car.piece is p1
@@ -52,9 +52,9 @@ def test_apply_force() -> None:
 
 
 def test_apply_impulse() -> None:
-    p1, p2 = Piece.create_line(GridPosition(0, 0), RIGHT, 2)
+    p1, p2 = Piece.create_line(GridPosition(0, 0), Direction.RIGHT, 2)
     Grid(pieces=[p1, p2])
-    car = Car(TrackPosition(p1.connection(LEFT), 0.5), velocity_damping=0)
+    car = Car(TrackPosition(p1.connection(Direction.LEFT), 0.5), velocity_damping=0)
     assert car.velocity == 0
     assert car.u == 0.5
     assert car.piece is p1
@@ -63,10 +63,10 @@ def test_apply_impulse() -> None:
 
 
 def test_constant_force_no_friction() -> None:
-    c = Connection(LEFT, RIGHT)
+    c = Connection(Direction.LEFT, Direction.RIGHT)
     p = Piece(GridPosition(0, 0), connections={c})
     Grid(pieces=[p])
-    car = Car(TrackPosition(p.connection(LEFT), 0), velocity_damping=0)
+    car = Car(TrackPosition(p.connection(Direction.LEFT), 0), velocity_damping=0)
     last_velocity = car.velocity
     last_u = car.u
     for _ in range(10):
@@ -79,10 +79,10 @@ def test_constant_force_no_friction() -> None:
 
 
 def test_constant_friction_no_force() -> None:
-    c = Connection(LEFT, RIGHT)
+    c = Connection(Direction.LEFT, Direction.RIGHT)
     p = Piece(GridPosition(0, 0), connections={c})
     Grid(pieces=[p])
-    car = Car(TrackPosition(p.connection(LEFT), 0), velocity_damping=-1)
+    car = Car(TrackPosition(p.connection(Direction.LEFT), 0), velocity_damping=-1)
     car.apply_impulse(1)
     last_velocity = car.velocity
     last_u = car.u
@@ -95,29 +95,29 @@ def test_constant_friction_no_force() -> None:
 
 
 def test_ends() -> None:
-    p1, p2, p3 = Piece.create_line(GridPosition(0, 0), RIGHT, 3)
+    p1, p2, p3 = Piece.create_line(GridPosition(0, 0), Direction.RIGHT, 3)
     Grid(pieces=[p1, p2, p3])
-    car = Car(TrackPosition(p2.connection(LEFT), 0.75), length=1)
+    car = Car(TrackPosition(p2.connection(Direction.LEFT), 0.75), length=1)
     assert car.ends == (
-        TrackPosition(p2.connection(LEFT), 0.25),
-        TrackPosition(p3.connection(LEFT), 0.25),
+        TrackPosition(p2.connection(Direction.LEFT), 0.25),
+        TrackPosition(p3.connection(Direction.LEFT), 0.25),
     )
 
 
 def test_ends_long() -> None:
-    p1, p2, p3 = Piece.create_line(GridPosition(0, 0), RIGHT, 3)
+    p1, p2, p3 = Piece.create_line(GridPosition(0, 0), Direction.RIGHT, 3)
     Grid(pieces=[p1, p2, p3])
-    car = Car(TrackPosition(p2.connection(LEFT), 0.5), length=2)
+    car = Car(TrackPosition(p2.connection(Direction.LEFT), 0.5), length=2)
     assert car.ends == (
-        TrackPosition(p1.connection(LEFT), 0.5),
-        TrackPosition(p3.connection(LEFT), 0.5),
+        TrackPosition(p1.connection(Direction.LEFT), 0.5),
+        TrackPosition(p3.connection(Direction.LEFT), 0.5),
     )
 
 
 def test_ctor_manager() -> None:
-    p = Piece.create(GridPosition(0, 0), LEFT, RIGHT)
+    p = Piece.create(GridPosition(0, 0), Direction.LEFT, Direction.RIGHT)
     Grid(pieces=[p])
-    pos = TrackPosition(p.connection(LEFT), 0.5)
+    pos = TrackPosition(p.connection(Direction.LEFT), 0.5)
     manager = CarManager()
     car = Car(pos, manager=manager)
     assert car.manager is manager
@@ -125,9 +125,9 @@ def test_ctor_manager() -> None:
 
 
 def test_set_manager() -> None:
-    p = Piece.create(GridPosition(0, 0), LEFT, RIGHT)
+    p = Piece.create(GridPosition(0, 0), Direction.LEFT, Direction.RIGHT)
     Grid(pieces=[p])
-    pos = TrackPosition(p.connection(LEFT), 0.5)
+    pos = TrackPosition(p.connection(Direction.LEFT), 0.5)
     manager = CarManager()
     car = Car(pos)
     assert car.manager is None
@@ -141,9 +141,9 @@ def test_set_manager() -> None:
 
 
 def test_eq() -> None:
-    p = Piece.create(GridPosition(0, 0), LEFT, RIGHT)
+    p = Piece.create(GridPosition(0, 0), Direction.LEFT, Direction.RIGHT)
     Grid(pieces=[p])
-    pos = TrackPosition(p.connection(LEFT), 0.5)
+    pos = TrackPosition(p.connection(Direction.LEFT), 0.5)
     car = Car(pos)
     assert car == car
     assert car != Car(pos)
@@ -152,9 +152,9 @@ def test_eq() -> None:
 
 
 def test_invalid_manager() -> None:
-    p = Piece.create(GridPosition(0, 0), LEFT, RIGHT)
+    p = Piece.create(GridPosition(0, 0), Direction.LEFT, Direction.RIGHT)
     Grid(pieces=[p])
-    pos = TrackPosition(p.connection(LEFT), 0.5)
+    pos = TrackPosition(p.connection(Direction.LEFT), 0.5)
     manager = CarManager()
     car = Car(pos, manager=manager)
     with (
