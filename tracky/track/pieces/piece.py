@@ -4,6 +4,7 @@ from typing import Iterable, Mapping, Optional, override
 from tracky.core import Error, Validatable
 from tracky.track.grid.direction import Direction
 from tracky.track.grid.position import Position
+from tracky.track.grid.rotation import Rotation
 from tracky.track.pieces.connection import Connection
 
 
@@ -152,6 +153,24 @@ class Piece(Validatable):
                 forward_direction=direction,
             )
             position += direction
+
+    def rotate(self, rotation: Rotation) -> "Piece":
+        return Piece(
+            position=self.position,
+            connections=[connection.rotate(rotation) for connection in self.connections],
+        )
+
+    def is_same_as(self, rhs: "Piece") -> bool:
+        return len(self.connections) == len(rhs.connections) and all(
+            lhs_connection.is_same_as(rhs_connection)
+            for lhs_connection, rhs_connection in zip(self.connections, rhs.connections)
+        )
+
+    def rotation_to(self, rhs: "Piece") -> Optional[Rotation]:
+        for i in range(4):
+            rotation = Rotation(i)
+            if self.rotate(rotation).is_same_as(rhs):
+                return rotation
 
 
 from tracky.track.grid import grid

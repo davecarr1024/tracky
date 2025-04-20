@@ -3,6 +3,7 @@ from typing import Optional, override
 from tracky.core import Validatable
 from tracky.track.grid.direction import Direction
 from tracky.track.grid.position import Position
+from tracky.track.grid.rotation import Rotation
 
 
 class Connection(Validatable):
@@ -126,6 +127,24 @@ class Connection(Validatable):
     def _validate(self) -> None:
         if (piece_ := self.piece) and (self not in piece_.connections):
             raise self._validation_error(f"connection {self} not in piece {piece_}")
+
+    def rotate(self, rotation: Rotation) -> "Connection":
+        return Connection(
+            reverse_direction=self.reverse_direction * rotation,
+            forward_direction=self.forward_direction * rotation,
+        )
+
+    def is_same_as(self, rhs: "Connection") -> bool:
+        return (
+            self.reverse_direction == rhs.reverse_direction
+            and self.forward_direction == rhs.forward_direction
+        )
+
+    def rotation_to(self, rhs: "Connection") -> Optional[Rotation]:
+        for i in range(4):
+            rotation = Rotation(i)
+            if self.rotate(rotation).is_same_as(rhs):
+                return rotation
 
 
 from tracky.track.grid import grid as grid_lib

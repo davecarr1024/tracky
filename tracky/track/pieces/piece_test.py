@@ -1,8 +1,10 @@
-from typing import Iterable
+from typing import Iterable, Optional
 
 import pytest
+from pytest_subtests import SubTests
 
 from tracky.track.grid import Direction, Grid, Position
+from tracky.track.grid.rotation import Rotation
 from tracky.track.pieces import Connection, Piece
 
 
@@ -133,3 +135,119 @@ def test_create_line() -> None:
             Position(0, i),
             {(Direction.LEFT, Direction.RIGHT), (Direction.RIGHT, Direction.LEFT)},
         )
+
+
+def test_rotate(subtests: SubTests) -> None:
+    for piece, rotation, expected in list[tuple[Piece, Rotation, Piece]](
+        [
+            (
+                Piece(Position(0, 0)),
+                Rotation(0),
+                Piece(Position(0, 0)),
+            ),
+            (
+                Piece(Position(0, 0), connections={Connection(Direction.LEFT, Direction.RIGHT)}),
+                Rotation(0),
+                Piece(Position(0, 0), connections={Connection(Direction.LEFT, Direction.RIGHT)}),
+            ),
+            (
+                Piece(Position(0, 0), connections={Connection(Direction.LEFT, Direction.RIGHT)}),
+                Rotation(2),
+                Piece(Position(0, 0), connections={Connection(Direction.RIGHT, Direction.LEFT)}),
+            ),
+            (
+                Piece(
+                    Position(0, 0),
+                    connections={
+                        Connection(Direction.LEFT, Direction.RIGHT),
+                        Connection(Direction.UP, Direction.DOWN),
+                    },
+                ),
+                Rotation(1),
+                Piece(
+                    Position(0, 0),
+                    connections={
+                        Connection(Direction.UP, Direction.DOWN),
+                        Connection(Direction.RIGHT, Direction.LEFT),
+                    },
+                ),
+            ),
+        ]
+    ):
+        with subtests.test(piece=piece, rotation=rotation, expected=expected):
+            assert piece.rotate(rotation).is_same_as(expected)
+
+
+def test_is_same_as(subtests: SubTests) -> None:
+    for lhs, rhs, expected in list[tuple[Piece, Piece, bool]](
+        [
+            (
+                Piece(Position(0, 0)),
+                Piece(Position(0, 0)),
+                True,
+            ),
+            (
+                Piece(Position(0, 0)),
+                Piece(Position(0, 1)),
+                True,
+            ),
+            (
+                Piece(Position(0, 0), connections={Connection(Direction.LEFT, Direction.RIGHT)}),
+                Piece(Position(0, 0)),
+                False,
+            ),
+            (
+                Piece(Position(0, 0), connections={Connection(Direction.LEFT, Direction.RIGHT)}),
+                Piece(Position(0, 0), connections={Connection(Direction.UP, Direction.DOWN)}),
+                False,
+            ),
+            (
+                Piece(Position(0, 0), connections={Connection(Direction.LEFT, Direction.RIGHT)}),
+                Piece(Position(0, 0), connections={Connection(Direction.LEFT, Direction.RIGHT)}),
+                True,
+            ),
+        ]
+    ):
+        with subtests.test(lhs=lhs, rhs=rhs, expected=expected):
+            assert lhs.is_same_as(rhs) == expected
+
+
+def test_rotation_to(subtests: SubTests) -> None:
+    for lhs, rhs, expected in list[tuple[Piece, Piece, Optional[Rotation]]](
+        [
+            (
+                Piece(Position(0, 0)),
+                Piece(Position(0, 0)),
+                Rotation(0),
+            ),
+            (
+                Piece(Position(0, 0), connections={Connection(Direction.LEFT, Direction.RIGHT)}),
+                Piece(Position(0, 0), connections={Connection(Direction.LEFT, Direction.UP)}),
+                None,
+            ),
+            (
+                Piece(Position(0, 0), connections={Connection(Direction.LEFT, Direction.RIGHT)}),
+                Piece(Position(0, 0), connections={Connection(Direction.LEFT, Direction.RIGHT)}),
+                Rotation(0),
+            ),
+            (
+                Piece(Position(0, 0), connections={Connection(Direction.LEFT, Direction.RIGHT)}),
+                Piece(Position(0, 0), connections={Connection(Direction.UP, Direction.DOWN)}),
+                Rotation(1),
+            ),
+            (
+                Piece(Position(0, 0), connections={Connection(Direction.LEFT, Direction.RIGHT)}),
+                Piece(Position(0, 0), connections={Connection(Direction.RIGHT, Direction.LEFT)}),
+                Rotation(2),
+            ),
+            (
+                Piece(Position(0, 0), connections={Connection(Direction.LEFT, Direction.RIGHT)}),
+                Piece(Position(0, 0), connections={Connection(Direction.DOWN, Direction.UP)}),
+                Rotation(3),
+            ),
+        ]
+    ):
+        with subtests.test(lhs=lhs, rhs=rhs, expected=expected):
+            assert lhs.rotation_to(rhs) == expected
+            if expected is not None:
+                assert lhs.rotate(expected).is_same_as(rhs)

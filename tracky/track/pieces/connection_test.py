@@ -1,6 +1,9 @@
-import pytest
+from typing import Optional
 
-from tracky.track.grid import Direction, Grid, Position
+import pytest
+from pytest_subtests import SubTests
+
+from tracky.track.grid import Direction, Grid, Position, Rotation
 from tracky.track.pieces import Connection, Piece
 
 
@@ -137,3 +140,63 @@ def test_reverse_connection_unidirectional() -> None:
     # If we go backwards from p2 LEFT-RIGHT, we can't get back that way since there's no
     # entrance to p1 from the RIGHT, even though we're facing RIGHT.
     assert p2.connection(Direction.LEFT).reverse_connection is None
+
+
+def test_rotate() -> None:
+    c = Connection(Direction.LEFT, Direction.UP).rotate(Rotation(2))
+    assert c.reverse_direction == Direction.RIGHT
+    assert c.forward_direction == Direction.DOWN
+
+
+def test_is_same_as(subtests: SubTests) -> None:
+    for lhs, rhs, expected in list[tuple[Connection, Connection, bool]](
+        [
+            (
+                Connection(Direction.LEFT, Direction.RIGHT),
+                Connection(Direction.LEFT, Direction.RIGHT),
+                True,
+            ),
+            (
+                Connection(Direction.LEFT, Direction.RIGHT),
+                Connection(Direction.LEFT, Direction.UP),
+                False,
+            ),
+        ]
+    ):
+        with subtests.test(lhs=lhs, rhs=rhs, expected=expected):
+            assert lhs.is_same_as(rhs) == expected
+            assert rhs.is_same_as(lhs) == expected
+
+
+def test_rotation_to(subtests: SubTests) -> None:
+    for lhs, rhs, expected in list[tuple[Connection, Connection, Optional[Rotation]]](
+        [
+            (
+                Connection(Direction.LEFT, Direction.RIGHT),
+                Connection(Direction.LEFT, Direction.UP),
+                None,
+            ),
+            (
+                Connection(Direction.LEFT, Direction.RIGHT),
+                Connection(Direction.LEFT, Direction.RIGHT),
+                Rotation(0),
+            ),
+            (
+                Connection(Direction.LEFT, Direction.RIGHT),
+                Connection(Direction.UP, Direction.DOWN),
+                Rotation(1),
+            ),
+            (
+                Connection(Direction.LEFT, Direction.RIGHT),
+                Connection(Direction.RIGHT, Direction.LEFT),
+                Rotation(2),
+            ),
+            (
+                Connection(Direction.LEFT, Direction.RIGHT),
+                Connection(Direction.DOWN, Direction.UP),
+                Rotation(3),
+            ),
+        ]
+    ):
+        with subtests.test(lhs=lhs, rhs=rhs, expected=expected):
+            assert lhs.rotation_to(rhs) == expected
