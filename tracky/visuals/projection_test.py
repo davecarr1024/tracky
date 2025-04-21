@@ -1,14 +1,14 @@
-from typing import Optional
+from typing import Optional, SupportsFloat
 
 from pytest_subtests import SubTests
 
 from tracky.track import Connection, ConnectionShape, Direction, GridPosition, Piece, TrackPosition
-from tracky.visuals import Projection, Rectangle, Vector
+from tracky.visuals import Position, Projection, Rectangle, Rotation
 
 
 def test_grid_width() -> None:
     projection = Projection(
-        Rectangle(Vector(0, 0), Vector(800, 600)),
+        Rectangle(Position(0, 0), Position(800, 600)),
         GridPosition(5, 10),
         tile_size=100,
     )
@@ -19,11 +19,11 @@ def test_grid_width() -> None:
 
 def test_grid_to_screen(subtests: SubTests) -> None:
     projection = Projection(
-        Rectangle(Vector(0, 0), Vector(800, 600)),
+        Rectangle(Position(0, 0), Position(800, 600)),
         GridPosition(5, 10),
         tile_size=100,
     )
-    for position, expected in list[tuple[GridPosition, Optional[Vector]]](
+    for position, expected in list[tuple[GridPosition, Optional[Position]]](
         [
             (
                 GridPosition(4, 10),
@@ -43,19 +43,19 @@ def test_grid_to_screen(subtests: SubTests) -> None:
             ),
             (
                 GridPosition(5, 10),
-                Vector(0, 0),
+                Position(0, 0),
             ),
             (
                 GridPosition(6, 10),
-                Vector(0, 100),
+                Position(0, 100),
             ),
             (
                 GridPosition(5, 11),
-                Vector(100, 0),
+                Position(100, 0),
             ),
             (
                 GridPosition(10, 17),
-                Vector(700, 500),
+                Position(700, 500),
             ),
             (
                 GridPosition(11, 18),
@@ -69,21 +69,21 @@ def test_grid_to_screen(subtests: SubTests) -> None:
 
 def test_screen_to_grid(subtests: SubTests) -> None:
     projection = Projection(
-        Rectangle(Vector(0, 0), Vector(800, 600)),
+        Rectangle(Position(0, 0), Position(800, 600)),
         GridPosition(5, 10),
         tile_size=100,
     )
-    for position, expected in list[tuple[Vector, Optional[GridPosition]]](
+    for position, expected in list[tuple[Position, Optional[GridPosition]]](
         [
-            (Vector(-1, 0), None),
-            (Vector(0, -1), None),
-            (Vector(0, 801), None),
-            (Vector(0, 601), None),
-            (Vector(0, 0), GridPosition(5, 10)),
-            (Vector(99, 99), GridPosition(5, 10)),
-            (Vector(100, 100), GridPosition(6, 11)),
-            (Vector(799, 599), GridPosition(10, 17)),
-            (Vector(800, 600), None),
+            (Position(-1, 0), None),
+            (Position(0, -1), None),
+            (Position(0, 801), None),
+            (Position(0, 601), None),
+            (Position(0, 0), GridPosition(5, 10)),
+            (Position(99, 99), GridPosition(5, 10)),
+            (Position(100, 100), GridPosition(6, 11)),
+            (Position(799, 599), GridPosition(10, 17)),
+            (Position(800, 600), None),
         ]
     ):
         with subtests.test(position=position, expected=expected):
@@ -92,26 +92,26 @@ def test_screen_to_grid(subtests: SubTests) -> None:
 
 def test_tile_center() -> None:
     projection = Projection(
-        Rectangle(Vector(0, 0), Vector(800, 600)),
+        Rectangle(Position(0, 0), Position(800, 600)),
         GridPosition(5, 10),
         tile_size=100,
     )
-    assert projection.tile_center(GridPosition(6, 12)) == Vector(250, 150)
+    assert projection.tile_center(GridPosition(6, 12)) == Position(250, 150)
 
 
 def test_tile_side(subtests: SubTests) -> None:
     projection = Projection(
-        Rectangle(Vector(0, 0), Vector(800, 600)),
+        Rectangle(Position(0, 0), Position(800, 600)),
         GridPosition(5, 10),
         tile_size=100,
     )
-    for position, direction, expected in list[tuple[GridPosition, Direction, Optional[Vector]]](
+    for position, direction, expected in list[tuple[GridPosition, Direction, Optional[Position]]](
         [
             (GridPosition(0, 0), Direction.LEFT, None),
-            (GridPosition(5, 10), Direction.LEFT, Vector(0, 50)),
-            (GridPosition(5, 10), Direction.UP, Vector(50, 0)),
-            (GridPosition(5, 10), Direction.RIGHT, Vector(100, 50)),
-            (GridPosition(5, 10), Direction.DOWN, Vector(50, 100)),
+            (GridPosition(5, 10), Direction.LEFT, Position(0, 50)),
+            (GridPosition(5, 10), Direction.UP, Position(50, 0)),
+            (GridPosition(5, 10), Direction.RIGHT, Position(100, 50)),
+            (GridPosition(5, 10), Direction.DOWN, Position(50, 100)),
         ]
     ):
         with subtests.test(position=position, direction=direction, expected=expected):
@@ -120,7 +120,7 @@ def test_tile_side(subtests: SubTests) -> None:
 
 def test_tile_corner(subtests: SubTests) -> None:
     projection = Projection(
-        Rectangle(Vector(0, 0), Vector(800, 600)),
+        Rectangle(Position(0, 0), Position(800, 600)),
         GridPosition(5, 10),
         tile_size=100,
     )
@@ -128,7 +128,7 @@ def test_tile_corner(subtests: SubTests) -> None:
         tuple[
             GridPosition,
             tuple[Direction, Direction],
-            Optional[Vector],
+            Optional[Position],
         ]
     ](
         [
@@ -140,22 +140,22 @@ def test_tile_corner(subtests: SubTests) -> None:
             (
                 GridPosition(5, 10),
                 (Direction.LEFT, Direction.UP),
-                Vector(0, 0),
+                Position(0, 0),
             ),
             (
                 GridPosition(5, 10),
                 (Direction.RIGHT, Direction.UP),
-                Vector(100, 0),
+                Position(100, 0),
             ),
             (
                 GridPosition(5, 10),
                 (Direction.RIGHT, Direction.DOWN),
-                Vector(100, 100),
+                Position(100, 100),
             ),
             (
                 GridPosition(5, 10),
                 (Direction.LEFT, Direction.DOWN),
-                Vector(0, 100),
+                Position(0, 100),
             ),
             (
                 GridPosition(5, 10),
@@ -170,18 +170,18 @@ def test_tile_corner(subtests: SubTests) -> None:
 
 def test_connection_ends() -> None:
     projection = Projection(
-        Rectangle(Vector(0, 0), Vector(800, 600)),
+        Rectangle(Position(0, 0), Position(800, 600)),
         GridPosition(5, 10),
         tile_size=100,
     )
     c = Connection(Direction.LEFT, Direction.UP)
     Piece(GridPosition(5, 10), connections={c})
-    assert projection.connection_ends(c) == (Vector(0, 50), Vector(50, 0))
+    assert projection.connection_ends(c) == (Position(0, 50), Position(50, 0))
 
 
 def test_connection_ends_disconnected() -> None:
     projection = Projection(
-        Rectangle(Vector(0, 0), Vector(800, 600)),
+        Rectangle(Position(0, 0), Position(800, 600)),
         GridPosition(5, 10),
         tile_size=100,
     )
@@ -191,7 +191,7 @@ def test_connection_ends_disconnected() -> None:
 
 def test_connection_ends_off_grid() -> None:
     projection = Projection(
-        Rectangle(Vector(0, 0), Vector(800, 600)),
+        Rectangle(Position(0, 0), Position(800, 600)),
         GridPosition(5, 10),
         tile_size=100,
     )
@@ -202,27 +202,39 @@ def test_connection_ends_off_grid() -> None:
 
 def test_connection_lerp(subtests: SubTests) -> None:
     projection = Projection(
-        Rectangle(Vector(0, 0), Vector(800, 600)),
+        Rectangle(Position(0, 0), Position(800, 600)),
         GridPosition(5, 10),
         tile_size=100,
     )
-    for connection, u, expected in list[tuple[Connection, float, Optional[Vector]]](
+    for name, c, u, expected in list[
+        tuple[
+            str,
+            Connection,
+            SupportsFloat,
+            Optional[tuple[Position, Rotation]],
+        ]
+    ](
         [
             (
+                "disconnected",
                 Connection(Direction.LEFT, Direction.UP),
                 0,
                 None,
             ),
             (
+                "off grid",
                 Connection(
                     Direction.LEFT,
                     Direction.UP,
-                    piece=Piece(GridPosition(0, 0)),
+                    piece=Piece(
+                        GridPosition(0, 0),
+                    ),
                 ),
                 0,
                 None,
             ),
             (
+                "left-up straight 0",
                 Connection(
                     Direction.LEFT,
                     Direction.UP,
@@ -232,9 +244,13 @@ def test_connection_lerp(subtests: SubTests) -> None:
                     ),
                 ),
                 0,
-                Vector(0, 50),
+                (
+                    Position(0, 50),
+                    Rotation.from_degrees(-45),
+                ),
             ),
             (
+                "left-up straight 0.5",
                 Connection(
                     Direction.LEFT,
                     Direction.UP,
@@ -244,9 +260,13 @@ def test_connection_lerp(subtests: SubTests) -> None:
                     ),
                 ),
                 0.5,
-                Vector(25, 25),
+                (
+                    Position(25, 25),
+                    Rotation.from_degrees(-45),
+                ),
             ),
             (
+                "left-up straight 1",
                 Connection(
                     Direction.LEFT,
                     Direction.UP,
@@ -256,81 +276,13 @@ def test_connection_lerp(subtests: SubTests) -> None:
                     ),
                 ),
                 1,
-                Vector(50, 0),
-            ),
-            (
-                Connection(
-                    Direction.LEFT,
-                    Direction.RIGHT,
-                    piece=Piece(
-                        GridPosition(5, 10),
-                        connection_shape=ConnectionShape.STRAIGHT,
-                    ),
+                (
+                    Position(50, 0),
+                    Rotation.from_degrees(-45),
                 ),
-                0,
-                Vector(0, 50),
             ),
             (
-                Connection(
-                    Direction.LEFT,
-                    Direction.RIGHT,
-                    piece=Piece(
-                        GridPosition(5, 10),
-                        connection_shape=ConnectionShape.STRAIGHT,
-                    ),
-                ),
-                0.5,
-                Vector(50, 50),
-            ),
-            (
-                Connection(
-                    Direction.LEFT,
-                    Direction.RIGHT,
-                    piece=Piece(
-                        GridPosition(5, 10),
-                        connection_shape=ConnectionShape.STRAIGHT,
-                    ),
-                ),
-                1,
-                Vector(100, 50),
-            ),
-            (
-                Connection(
-                    Direction.LEFT,
-                    Direction.RIGHT,
-                    piece=Piece(
-                        GridPosition(5, 10),
-                        connection_shape=ConnectionShape.CURVED,
-                    ),
-                ),
-                0,
-                Vector(0, 50),
-            ),
-            (
-                Connection(
-                    Direction.LEFT,
-                    Direction.RIGHT,
-                    piece=Piece(
-                        GridPosition(5, 10),
-                        connection_shape=ConnectionShape.CURVED,
-                    ),
-                ),
-                0.5,
-                Vector(50, 50),
-            ),
-            (
-                Connection(
-                    Direction.LEFT,
-                    Direction.RIGHT,
-                    piece=Piece(
-                        GridPosition(5, 10),
-                        connection_shape=ConnectionShape.CURVED,
-                    ),
-                ),
-                1,
-                Vector(100, 50),
-            ),
-            (
+                "left-up curved 0",
                 Connection(
                     Direction.LEFT,
                     Direction.UP,
@@ -340,9 +292,13 @@ def test_connection_lerp(subtests: SubTests) -> None:
                     ),
                 ),
                 0,
-                Vector(0, 50),
+                (
+                    Position(0, 50),
+                    Rotation.from_degrees(0),
+                ),
             ),
             (
+                "left-up curved 0.5",
                 Connection(
                     Direction.LEFT,
                     Direction.UP,
@@ -352,9 +308,13 @@ def test_connection_lerp(subtests: SubTests) -> None:
                     ),
                 ),
                 0.5,
-                Vector(35, 35),
+                (
+                    Position(35, 35),
+                    Rotation.from_degrees(-45),
+                ),
             ),
             (
+                "left-up curved 1",
                 Connection(
                     Direction.LEFT,
                     Direction.UP,
@@ -364,128 +324,74 @@ def test_connection_lerp(subtests: SubTests) -> None:
                     ),
                 ),
                 1,
-                Vector(50, 0),
+                (
+                    Position(50, 0),
+                    Rotation.from_degrees(-90),
+                ),
             ),
             (
+                "left-right curved 0",
                 Connection(
+                    Direction.LEFT,
                     Direction.RIGHT,
-                    Direction.UP,
                     piece=Piece(
                         GridPosition(5, 10),
                         connection_shape=ConnectionShape.CURVED,
                     ),
                 ),
                 0,
-                Vector(100, 50),
+                (
+                    Position(0, 50),
+                    Rotation.from_degrees(0),
+                ),
             ),
             (
+                "left-right curved 0.5",
                 Connection(
+                    Direction.LEFT,
                     Direction.RIGHT,
-                    Direction.UP,
                     piece=Piece(
                         GridPosition(5, 10),
                         connection_shape=ConnectionShape.CURVED,
                     ),
                 ),
                 0.5,
-                Vector(65, 35),
+                (
+                    Position(50, 50),
+                    Rotation.from_degrees(0),
+                ),
             ),
             (
+                "left-right curved 1",
                 Connection(
+                    Direction.LEFT,
                     Direction.RIGHT,
-                    Direction.UP,
                     piece=Piece(
                         GridPosition(5, 10),
                         connection_shape=ConnectionShape.CURVED,
                     ),
                 ),
                 1,
-                Vector(50, 0),
-            ),
-            (
-                Connection(
-                    Direction.LEFT,
-                    Direction.DOWN,
-                    piece=Piece(
-                        GridPosition(5, 10),
-                        connection_shape=ConnectionShape.CURVED,
-                    ),
+                (
+                    Position(100, 50),
+                    Rotation.from_degrees(0),
                 ),
-                0,
-                Vector(0, 50),
-            ),
-            (
-                Connection(
-                    Direction.LEFT,
-                    Direction.DOWN,
-                    piece=Piece(
-                        GridPosition(5, 10),
-                        connection_shape=ConnectionShape.CURVED,
-                    ),
-                ),
-                0.5,
-                Vector(35, 65),
-            ),
-            (
-                Connection(
-                    Direction.LEFT,
-                    Direction.DOWN,
-                    piece=Piece(
-                        GridPosition(5, 10),
-                        connection_shape=ConnectionShape.CURVED,
-                    ),
-                ),
-                1,
-                Vector(50, 100),
-            ),
-            (
-                Connection(
-                    Direction.RIGHT,
-                    Direction.DOWN,
-                    piece=Piece(
-                        GridPosition(5, 10),
-                        connection_shape=ConnectionShape.CURVED,
-                    ),
-                ),
-                0,
-                Vector(100, 50),
-            ),
-            (
-                Connection(
-                    Direction.RIGHT,
-                    Direction.DOWN,
-                    piece=Piece(
-                        GridPosition(5, 10),
-                        connection_shape=ConnectionShape.CURVED,
-                    ),
-                ),
-                0.5,
-                Vector(65, 65),
-            ),
-            (
-                Connection(
-                    Direction.RIGHT,
-                    Direction.DOWN,
-                    piece=Piece(
-                        GridPosition(5, 10),
-                        connection_shape=ConnectionShape.CURVED,
-                    ),
-                ),
-                1,
-                Vector(50, 100),
             ),
         ]
     ):
-        with subtests.test(connection=connection, u=u, expected=expected):
-            assert projection.connection_lerp(connection, u) == expected
+        with subtests.test(name=name, c=c, u=u, expected=expected):
+            assert projection.connection_lerp(c, u) == expected
 
 
 def test_track_to_screen() -> None:
     projection = Projection(
-        Rectangle(Vector(0, 0), Vector(800, 600)),
+        Rectangle(Position(0, 0), Position(800, 600)),
         GridPosition(5, 10),
         tile_size=100,
     )
     c = Connection(Direction.LEFT, Direction.UP)
     Piece(GridPosition(5, 10), connections={c})
-    assert projection.track_to_screen(TrackPosition(c, 0.5)) == Vector(25, 25)
+    assert projection.track_to_screen(TrackPosition(c, 0.5)) == (
+        Position(25, 25),
+        Rotation.from_degrees(-45),
+    )

@@ -1,31 +1,32 @@
 from dataclasses import dataclass
 
 from tracky.core import Error, Errorable
-from tracky.visuals.vector import Vector
+from tracky.visuals.offset import Offset
+from tracky.visuals.position import Position
 
 
 @dataclass(frozen=True)
 class Rectangle(Errorable):
     class ValueError(Error, ValueError): ...
 
-    min: Vector
-    max: Vector
+    min: Position
+    max: Position
 
     def __post_init__(self) -> None:
-        if self.min > self.max:
+        if self.min.x > self.max.x or self.min.y > self.max.y:
             raise self._error(f"invalid rect bounds {self.min} > {self.max}", self.ValueError)
 
     @property
-    def size(self) -> Vector:
+    def size(self) -> Offset:
         return self.max - self.min
 
     @property
     def width(self) -> int:
-        return self.size.x
+        return self.size.dx
 
     @property
     def height(self) -> int:
-        return self.size.y
+        return self.size.dy
 
-    def __contains__(self, rhs: Vector) -> bool:
-        return rhs >= self.min and rhs < self.max
+    def __contains__(self, rhs: Position) -> bool:
+        return self.min.x <= rhs.x < self.max.x and self.min.y <= rhs.y < self.max.y

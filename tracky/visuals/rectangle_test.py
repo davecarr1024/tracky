@@ -1,67 +1,67 @@
 import pytest
 from pytest_subtests import SubTests
 
-from tracky.visuals import Rectangle, Vector
+from tracky.visuals import Offset, Position, Rectangle
 
 
 def test_invalid_bounds() -> None:
     with pytest.raises(Rectangle.ValueError):
-        Rectangle(Vector(1, 1), Vector(0, 0))
+        Rectangle(Position(1, 1), Position(0, 0))
 
 
 def test_size() -> None:
-    assert Rectangle(Vector(1, 2), Vector(4, 3)).size == Vector(3, 1)
+    assert Rectangle(Position(1, 2), Position(4, 3)).size == Offset(3, 1)
 
 
 def test_width() -> None:
-    assert Rectangle(Vector(1, 2), Vector(4, 3)).width == 3
+    assert Rectangle(Position(1, 2), Position(4, 3)).width == 3
 
 
 def test_height() -> None:
-    assert Rectangle(Vector(1, 2), Vector(4, 3)).height == 1
+    assert Rectangle(Position(1, 2), Position(4, 3)).height == 1
 
 
 def test_contains(subtests: SubTests) -> None:
-    for v, r, expected in list[tuple[Vector, Rectangle, bool]](
+    for v, r, expected in list[tuple[Position, Rectangle, bool]](
         [
             (
-                Vector(0, 0),
-                Rectangle(Vector(0, 0), Vector(10, 5)),
+                Position(0, 0),
+                Rectangle(Position(0, 0), Position(10, 5)),
                 True,
             ),
             (
-                Vector(9, 0),
-                Rectangle(Vector(0, 0), Vector(10, 5)),
+                Position(9, 0),
+                Rectangle(Position(0, 0), Position(10, 5)),
                 True,
             ),
             (
-                Vector(0, 4),
-                Rectangle(Vector(0, 0), Vector(10, 5)),
+                Position(0, 4),
+                Rectangle(Position(0, 0), Position(10, 5)),
                 True,
             ),
             (
-                Vector(9, 4),
-                Rectangle(Vector(0, 0), Vector(10, 5)),
+                Position(9, 4),
+                Rectangle(Position(0, 0), Position(10, 5)),
                 True,
             ),
             (
-                Vector(-1, 0),
-                Rectangle(Vector(0, 0), Vector(10, 5)),
+                Position(-1, 0),
+                Rectangle(Position(0, 0), Position(10, 5)),
                 False,
             ),
             (
-                Vector(0, -1),
-                Rectangle(Vector(0, 0), Vector(10, 5)),
+                Position(0, -1),
+                Rectangle(Position(0, 0), Position(10, 5)),
                 False,
             ),
             (
-                Vector(10, 4),
-                Rectangle(Vector(0, 0), Vector(10, 5)),
+                Position(10, 4),
+                Rectangle(Position(0, 0), Position(10, 5)),
                 False,
             ),
             (
-                Vector(9, 5),
-                Rectangle(Vector(0, 0), Vector(10, 5)),
+                Position(9, 5),
+                Rectangle(Position(0, 0), Position(10, 5)),
                 False,
             ),
         ]
