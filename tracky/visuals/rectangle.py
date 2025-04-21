@@ -28,4 +28,4 @@ class Rectangle(Errorable):
         return self.size.y
 
     def __contains__(self, rhs: Vector) -> bool:
-        return rhs >= self.min and rhs <= self.max
+        return rhs >= self.min and rhs < self.max

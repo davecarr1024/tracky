@@ -30,17 +30,17 @@ def test_contains(subtests: SubTests) -> None:
                 True,
             ),
             (
-                Vector(10, 0),
+                Vector(9, 0),
                 Rectangle(Vector(0, 0), Vector(10, 5)),
                 True,
             ),
             (
-                Vector(0, 5),
+                Vector(0, 4),
                 Rectangle(Vector(0, 0), Vector(10, 5)),
                 True,
             ),
             (
-                Vector(10, 5),
+                Vector(9, 4),
                 Rectangle(Vector(0, 0), Vector(10, 5)),
                 True,
             ),
@@ -55,12 +55,12 @@ def test_contains(subtests: SubTests) -> None:
                 False,
             ),
             (
-                Vector(11, 5),
+                Vector(10, 4),
                 Rectangle(Vector(0, 0), Vector(10, 5)),
                 False,
             ),
             (
-                Vector(10, 6),
+                Vector(9, 5),
                 Rectangle(Vector(0, 0), Vector(10, 5)),
                 False,
             ),
