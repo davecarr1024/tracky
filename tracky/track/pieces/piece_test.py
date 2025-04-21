@@ -5,7 +5,7 @@ from pytest_subtests import SubTests
 
 from tracky.track.grid import Direction, Grid, Position
 from tracky.track.grid.rotation import Rotation
-from tracky.track.pieces import Connection, Piece
+from tracky.track.pieces import Connection, ConnectionShape, Piece
 
 
 def test_ctor_empty() -> None:
@@ -13,6 +13,13 @@ def test_ctor_empty() -> None:
     assert piece.position == Position(0, 0)
     assert piece.grid is None
     assert piece.connections == frozenset()
+    assert piece.connection_shape is ConnectionShape.STRAIGHT
+
+
+def test_ctor_connection_shape() -> None:
+    piece = Piece(Position(0, 0), connection_shape=ConnectionShape.CURVED)
+    assert piece.position == Position(0, 0)
+    assert piece.connection_shape is ConnectionShape.CURVED
 
 
 def test_ctor_grid() -> None:

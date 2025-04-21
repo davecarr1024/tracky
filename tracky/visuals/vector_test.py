@@ -80,3 +80,26 @@ def test_lerp(subtests: SubTests) -> None:
     ):
         with subtests.test(lhs=lhs, rhs=rhs, u=u, expected=expected):
             assert lhs.lerp(rhs, u) == expected
+
+
+def test_length(subtests: SubTests) -> None:
+    for v, expected in list[tuple[Vector, float]](
+        [
+            (Vector(3, 4), 5),
+            (Vector(0, 50), 50),
+            (Vector(-100, 0), 100),
+        ]
+    ):
+        with subtests.test(v=v, expected=expected):
+            assert v.length == expected
+
+
+def test_norm(subtests: SubTests) -> None:
+    for v, expected in list[tuple[Vector, Vector]](
+        [
+            (Vector(50, 0), Vector(1, 0)),
+            (Vector(0, -100), Vector(0, -1)),
+        ]
+    ):
+        with subtests.test(v=v, expected=expected):
+            assert v.norm() == expected

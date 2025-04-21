@@ -1,8 +1,10 @@
+import functools
+import math
 from dataclasses import dataclass
 from typing import Optional
 
-from tracky.core import Error, Errorable
-from tracky.track import Connection, Direction, GridPosition, TrackPosition
+from tracky.core import Errorable
+from tracky.track import Connection, ConnectionShape, Direction, GridPosition, TrackPosition
 from tracky.visuals.rectangle import Rectangle
 from tracky.visuals.vector import Vector
 
@@ -10,8 +12,6 @@ from tracky.visuals.vector import Vector
 @dataclass(frozen=True)
 class Projection(Errorable):
     """Projection of game grid space to screen space."""
-
-    class ValueError(Error, ValueError): ...
 
     screen_rect: Rectangle
     grid_origin: GridPosition
@@ -75,7 +75,7 @@ class Projection(Errorable):
                 case (Direction.DOWN, Direction.RIGHT) | (Direction.RIGHT, Direction.DOWN):
                     return pos + Vector(self.tile_size, self.tile_size)
                 case _:
-                    raise self._error(f"invalid corner directions {directions}", self.ValueError)
+                    return None
 
     def connection_ends(self, connection: Connection) -> Optional[tuple[Vector, Vector]]:
         if (
@@ -85,10 +85,53 @@ class Projection(Errorable):
         ):
             return reverse_side, forward_side
 
+    def connection_corner(self, connection: Connection) -> Optional[Vector]:
+        if position := connection.position:
+            return self.tile_corner(
+                position,
+                (
+                    connection.reverse_direction,
+                    connection.forward_direction,
+                ),
+            )
+
     def connection_lerp(self, connection: Connection, u: float) -> Optional[Vector]:
-        if ends := self.connection_ends(connection):
+        if (ends := self.connection_ends(connection)) and (
+            connection_shape := connection.connection_shape
+        ):
             reverse_pos, forward_pos = ends
-            return reverse_pos.lerp(forward_pos, u)
+            match connection_shape:
+                case ConnectionShape.STRAIGHT:
+                    return reverse_pos.lerp(forward_pos, u)
+                case ConnectionShape.CURVED:
+                    if corner := self.connection_corner(connection):
+
+                        @functools.cache
+                        def angles(
+                            reverse_delta: Vector, forward_delta: Vector
+                        ) -> tuple[float, float]:
+                            return (
+                                math.atan2(reverse_delta.y, reverse_delta.x),
+                                math.atan2(forward_delta.y, forward_delta.x),
+                            )
+
+                        # This piece curves around corner - find angles from corner to sides.
+                        reverse_th, forward_th = angles(
+                            (reverse_pos - corner).norm(),
+                            (forward_pos - corner).norm(),
+                        )
+                        # Fix forward_th to be in the same rotation as reverse_th.
+                        delta_th = (forward_th - reverse_th + math.pi * 3) % (math.pi * 2) - math.pi
+                        # Lerp the between the two rotations.
+                        th = reverse_th + delta_th * u
+                        # Use lerped the to find lerped pos along curved path.
+                        return corner + Vector(
+                            int(math.cos(th) * self.tile_size / 2),
+                            int(math.sin(th) * self.tile_size / 2),
+                        )
+                    else:
+                        # No corner found between sides - this is a straight piece of track.
+                        return reverse_pos.lerp(forward_pos, u)
 
     def track_to_screen(self, track_position: TrackPosition) -> Optional[Vector]:
         return self.connection_lerp(track_position.connection, track_position.u)

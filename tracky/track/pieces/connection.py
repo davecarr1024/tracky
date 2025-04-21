@@ -4,6 +4,7 @@ from tracky.core import Validatable
 from tracky.track.grid.direction import Direction
 from tracky.track.grid.position import Position
 from tracky.track.grid.rotation import Rotation
+from tracky.track.pieces.connection_shape import ConnectionShape
 
 
 class Connection(Validatable):
@@ -122,6 +123,11 @@ class Connection(Validatable):
     def position(self) -> Optional["Position"]:
         if piece_ := self.piece:
             return piece_.position
+
+    @property
+    def connection_shape(self) -> Optional["ConnectionShape"]:
+        if piece_ := self.piece:
+            return piece_.connection_shape
 
     @override
     def _validate(self) -> None:

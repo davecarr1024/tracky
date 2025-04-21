@@ -1,3 +1,4 @@
+import math
 from dataclasses import dataclass
 
 
@@ -20,8 +21,8 @@ class Vector:
     def __mul__(self, rhs: int | float) -> "Vector":
         return Vector(int(self.x * rhs), int(self.y * rhs))
 
-    def __floordiv__(self, rhs: int) -> "Vector":
-        return Vector(self.x // rhs, self.y // rhs)
+    def __floordiv__(self, rhs: int | float) -> "Vector":
+        return Vector(int(self.x // rhs), int(self.y // rhs))
 
     def __lt__(self, rhs: "Vector") -> bool:
         return self.x < rhs.x and self.y < rhs.y
@@ -37,3 +38,10 @@ class Vector:
 
     def lerp(self, rhs: "Vector", u: float) -> "Vector":
         return self + (rhs - self) * u
+
+    @property
+    def length(self) -> float:
+        return math.sqrt(self.x * self.x + self.y * self.y)
+
+    def norm(self) -> "Vector":
+        return self // self.length

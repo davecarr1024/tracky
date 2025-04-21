@@ -1,9 +1,8 @@
 from typing import Optional
 
-import pytest
 from pytest_subtests import SubTests
 
-from tracky.track import Connection, Direction, GridPosition, Piece, TrackPosition
+from tracky.track import Connection, ConnectionShape, Direction, GridPosition, Piece, TrackPosition
 from tracky.visuals import Projection, Rectangle, Vector
 
 
@@ -158,20 +157,15 @@ def test_tile_corner(subtests: SubTests) -> None:
                 (Direction.LEFT, Direction.DOWN),
                 Vector(0, 100),
             ),
+            (
+                GridPosition(5, 10),
+                (Direction.LEFT, Direction.RIGHT),
+                None,
+            ),
         ]
     ):
         with subtests.test(position=position, directions=directions, expected=expected):
             assert projection.tile_corner(position, directions) == expected
-
-
-def test_tile_corner_invalid_directions() -> None:
-    projection = Projection(
-        Rectangle(Vector(0, 0), Vector(800, 600)),
-        GridPosition(5, 10),
-        tile_size=100,
-    )
-    with pytest.raises(Projection.ValueError):
-        projection.tile_corner(GridPosition(5, 10), (Direction.LEFT, Direction.RIGHT))
 
 
 def test_connection_ends() -> None:
@@ -206,15 +200,284 @@ def test_connection_ends_off_grid() -> None:
     assert projection.connection_ends(c) is None
 
 
-def test_connection_lerp() -> None:
+def test_connection_lerp(subtests: SubTests) -> None:
     projection = Projection(
         Rectangle(Vector(0, 0), Vector(800, 600)),
         GridPosition(5, 10),
         tile_size=100,
     )
-    c = Connection(Direction.LEFT, Direction.UP)
-    Piece(GridPosition(5, 10), connections={c})
-    assert projection.connection_lerp(c, 0.5) == Vector(25, 25)
+    for connection, u, expected in list[tuple[Connection, float, Optional[Vector]]](
+        [
+            (
+                Connection(Direction.LEFT, Direction.UP),
+                0,
+                None,
+            ),
+            (
+                Connection(
+                    Direction.LEFT,
+                    Direction.UP,
+                    piece=Piece(GridPosition(0, 0)),
+                ),
+                0,
+                None,
+            ),
+            (
+                Connection(
+                    Direction.LEFT,
+                    Direction.UP,
+                    piece=Piece(
+                        GridPosition(5, 10),
+                        connection_shape=ConnectionShape.STRAIGHT,
+                    ),
+                ),
+                0,
+                Vector(0, 50),
+            ),
+            (
+                Connection(
+                    Direction.LEFT,
+                    Direction.UP,
+                    piece=Piece(
+                        GridPosition(5, 10),
+                        connection_shape=ConnectionShape.STRAIGHT,
+                    ),
+                ),
+                0.5,
+                Vector(25, 25),
+            ),
+            (
+                Connection(
+                    Direction.LEFT,
+                    Direction.UP,
+                    piece=Piece(
+                        GridPosition(5, 10),
+                        connection_shape=ConnectionShape.STRAIGHT,
+                    ),
+                ),
+                1,
+                Vector(50, 0),
+            ),
+            (
+                Connection(
+                    Direction.LEFT,
+                    Direction.RIGHT,
+                    piece=Piece(
+                        GridPosition(5, 10),
+                        connection_shape=ConnectionShape.STRAIGHT,
+                    ),
+                ),
+                0,
+                Vector(0, 50),
+            ),
+            (
+                Connection(
+                    Direction.LEFT,
+                    Direction.RIGHT,
+                    piece=Piece(
+                        GridPosition(5, 10),
+                        connection_shape=ConnectionShape.STRAIGHT,
+                    ),
+                ),
+                0.5,
+                Vector(50, 50),
+            ),
+            (
+                Connection(
+                    Direction.LEFT,
+                    Direction.RIGHT,
+                    piece=Piece(
+                        GridPosition(5, 10),
+                        connection_shape=ConnectionShape.STRAIGHT,
+                    ),
+                ),
+                1,
+                Vector(100, 50),
+            ),
+            (
+                Connection(
+                    Direction.LEFT,
+                    Direction.RIGHT,
+                    piece=Piece(
+                        GridPosition(5, 10),
+                        connection_shape=ConnectionShape.CURVED,
+                    ),
+                ),
+                0,
+                Vector(0, 50),
+            ),
+            (
+                Connection(
+                    Direction.LEFT,
+                    Direction.RIGHT,
+                    piece=Piece(
+                        GridPosition(5, 10),
+                        connection_shape=ConnectionShape.CURVED,
+                    ),
+                ),
+                0.5,
+                Vector(50, 50),
+            ),
+            (
+                Connection(
+                    Direction.LEFT,
+                    Direction.RIGHT,
+                    piece=Piece(
+                        GridPosition(5, 10),
+                        connection_shape=ConnectionShape.CURVED,
+                    ),
+                ),
+                1,
+                Vector(100, 50),
+            ),
+            (
+                Connection(
+                    Direction.LEFT,
+                    Direction.UP,
+                    piece=Piece(
+                        GridPosition(5, 10),
+                        connection_shape=ConnectionShape.CURVED,
+                    ),
+                ),
+                0,
+                Vector(0, 50),
+            ),
+            (
+                Connection(
+                    Direction.LEFT,
+                    Direction.UP,
+                    piece=Piece(
+                        GridPosition(5, 10),
+                        connection_shape=ConnectionShape.CURVED,
+                    ),
+                ),
+                0.5,
+                Vector(35, 35),
+            ),
+            (
+                Connection(
+                    Direction.LEFT,
+                    Direction.UP,
+                    piece=Piece(
+                        GridPosition(5, 10),
+                        connection_shape=ConnectionShape.CURVED,
+                    ),
+                ),
+                1,
+                Vector(50, 0),
+            ),
+            (
+                Connection(
+                    Direction.RIGHT,
+                    Direction.UP,
+                    piece=Piece(
+                        GridPosition(5, 10),
+                        connection_shape=ConnectionShape.CURVED,
+                    ),
+                ),
+                0,
+                Vector(100, 50),
+            ),
+            (
+                Connection(
+                    Direction.RIGHT,
+                    Direction.UP,
+                    piece=Piece(
+                        GridPosition(5, 10),
+                        connection_shape=ConnectionShape.CURVED,
+                    ),
+                ),
+                0.5,
+                Vector(65, 35),
+            ),
+            (
+                Connection(
+                    Direction.RIGHT,
+                    Direction.UP,
+                    piece=Piece(
+                        GridPosition(5, 10),
+                        connection_shape=ConnectionShape.CURVED,
+                    ),
+                ),
+                1,
+                Vector(50, 0),
+            ),
+            (
+                Connection(
+                    Direction.LEFT,
+                    Direction.DOWN,
+                    piece=Piece(
+                        GridPosition(5, 10),
+                        connection_shape=ConnectionShape.CURVED,
+                    ),
+                ),
+                0,
+                Vector(0, 50),
+            ),
+            (
+                Connection(
+                    Direction.LEFT,
+                    Direction.DOWN,
+                    piece=Piece(
+                        GridPosition(5, 10),
+                        connection_shape=ConnectionShape.CURVED,
+                    ),
+                ),
+                0.5,
+                Vector(35, 65),
+            ),
+            (
+                Connection(
+                    Direction.LEFT,
+                    Direction.DOWN,
+                    piece=Piece(
+                        GridPosition(5, 10),
+                        connection_shape=ConnectionShape.CURVED,
+                    ),
+                ),
+                1,
+                Vector(50, 100),
+            ),
+            (
+                Connection(
+                    Direction.RIGHT,
+                    Direction.DOWN,
+                    piece=Piece(
+                        GridPosition(5, 10),
+                        connection_shape=ConnectionShape.CURVED,
+                    ),
+                ),
+                0,
+                Vector(100, 50),
+            ),
+            (
+                Connection(
+                    Direction.RIGHT,
+                    Direction.DOWN,
+                    piece=Piece(
+                        GridPosition(5, 10),
+                        connection_shape=ConnectionShape.CURVED,
+                    ),
+                ),
+                0.5,
+                Vector(65, 65),
+            ),
+            (
+                Connection(
+                    Direction.RIGHT,
+                    Direction.DOWN,
+                    piece=Piece(
+                        GridPosition(5, 10),
+                        connection_shape=ConnectionShape.CURVED,
+                    ),
+                ),
+                1,
+                Vector(50, 100),
+            ),
+        ]
+    ):
+        with subtests.test(connection=connection, u=u, expected=expected):
+            assert projection.connection_lerp(connection, u) == expected
 
 
 def test_track_to_screen() -> None:

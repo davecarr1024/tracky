@@ -6,6 +6,7 @@ from tracky.track.grid.direction import Direction
 from tracky.track.grid.position import Position
 from tracky.track.grid.rotation import Rotation
 from tracky.track.pieces.connection import Connection
+from tracky.track.pieces.connection_shape import ConnectionShape
 
 
 class Piece(Validatable):
@@ -16,10 +17,12 @@ class Piece(Validatable):
         position: Position,
         connections: Optional[Iterable[Connection]] = None,
         grid: Optional["grid.Grid"] = None,
+        connection_shape: ConnectionShape = ConnectionShape.STRAIGHT,
     ) -> None:
         super().__init__()
         self.__grid: Optional["grid.Grid"] = None
         self.__connections = frozenset[Connection]()
+        self.__connection_shape = connection_shape
         with self._pause_validation():
             self.__position = position
             if connections is not None:
@@ -41,6 +44,10 @@ class Piece(Validatable):
     @property
     def position(self) -> Position:
         return self.__position
+
+    @property
+    def connection_shape(self) -> ConnectionShape:
+        return self.__connection_shape
 
     @property
     def connections(self) -> frozenset[Connection]:
