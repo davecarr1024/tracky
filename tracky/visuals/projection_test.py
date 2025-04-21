@@ -3,7 +3,7 @@ from typing import Optional
 import pytest
 from pytest_subtests import SubTests
 
-from tracky.track import Direction, GridPosition
+from tracky.track import Connection, Direction, GridPosition, Piece, TrackPosition
 from tracky.visuals import Projection, Rectangle, Vector
 
 
@@ -172,3 +172,57 @@ def test_tile_corner_invalid_directions() -> None:
     )
     with pytest.raises(Projection.ValueError):
         projection.tile_corner(GridPosition(5, 10), (Direction.LEFT, Direction.RIGHT))
+
+
+def test_connection_ends() -> None:
+    projection = Projection(
+        Rectangle(Vector(0, 0), Vector(800, 600)),
+        GridPosition(5, 10),
+        tile_size=100,
+    )
+    c = Connection(Direction.LEFT, Direction.UP)
+    Piece(GridPosition(5, 10), connections={c})
+    assert projection.connection_ends(c) == (Vector(0, 50), Vector(50, 0))
+
+
+def test_connection_ends_disconnected() -> None:
+    projection = Projection(
+        Rectangle(Vector(0, 0), Vector(800, 600)),
+        GridPosition(5, 10),
+        tile_size=100,
+    )
+    c = Connection(Direction.LEFT, Direction.UP)
+    assert projection.connection_ends(c) is None
+
+
+def test_connection_ends_off_grid() -> None:
+    projection = Projection(
+        Rectangle(Vector(0, 0), Vector(800, 600)),
+        GridPosition(5, 10),
+        tile_size=100,
+    )
+    c = Connection(Direction.LEFT, Direction.UP)
+    Piece(GridPosition(0, 0), connections={c})
+    assert projection.connection_ends(c) is None
+
+
+def test_connection_lerp() -> None:
+    projection = Projection(
+        Rectangle(Vector(0, 0), Vector(800, 600)),
+        GridPosition(5, 10),
+        tile_size=100,
+    )
+    c = Connection(Direction.LEFT, Direction.UP)
+    Piece(GridPosition(5, 10), connections={c})
+    assert projection.connection_lerp(c, 0.5) == Vector(25, 25)
+
+
+def test_track_to_screen() -> None:
+    projection = Projection(
+        Rectangle(Vector(0, 0), Vector(800, 600)),
+        GridPosition(5, 10),
+        tile_size=100,
+    )
+    c = Connection(Direction.LEFT, Direction.UP)
+    Piece(GridPosition(5, 10), connections={c})
+    assert projection.track_to_screen(TrackPosition(c, 0.5)) == Vector(25, 25)

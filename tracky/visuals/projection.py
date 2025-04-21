@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from tracky.core import Error, Errorable
-from tracky.track import Direction, GridPosition
+from tracky.track import Connection, Direction, GridPosition, TrackPosition
 from tracky.visuals.rectangle import Rectangle
 from tracky.visuals.vector import Vector
 
@@ -76,3 +76,19 @@ class Projection(Errorable):
                     return pos + Vector(self.tile_size, self.tile_size)
                 case _:
                     raise self._error(f"invalid corner directions {directions}", self.ValueError)
+
+    def connection_ends(self, connection: Connection) -> Optional[tuple[Vector, Vector]]:
+        if (
+            (position := connection.position)
+            and (reverse_side := self.tile_side(position, connection.reverse_direction))
+            and (forward_side := self.tile_side(position, connection.forward_direction))
+        ):
+            return reverse_side, forward_side
+
+    def connection_lerp(self, connection: Connection, u: float) -> Optional[Vector]:
+        if ends := self.connection_ends(connection):
+            reverse_pos, forward_pos = ends
+            return reverse_pos.lerp(forward_pos, u)
+
+    def track_to_screen(self, track_position: TrackPosition) -> Optional[Vector]:
+        return self.connection_lerp(track_position.connection, track_position.u)

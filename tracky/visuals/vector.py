@@ -17,8 +17,8 @@ class Vector:
     def __sub__(self, rhs: "Vector") -> "Vector":
         return Vector(self.x - rhs.x, self.y - rhs.y)
 
-    def __mul__(self, rhs: int) -> "Vector":
-        return Vector(self.x * rhs, self.y * rhs)
+    def __mul__(self, rhs: int | float) -> "Vector":
+        return Vector(int(self.x * rhs), int(self.y * rhs))
 
     def __floordiv__(self, rhs: int) -> "Vector":
         return Vector(self.x // rhs, self.y // rhs)
@@ -34,3 +34,6 @@ class Vector:
 
     def __ge__(self, rhs: "Vector") -> bool:
         return self.x >= rhs.x and self.y >= rhs.y
+
+    def lerp(self, rhs: "Vector", u: float) -> "Vector":
+        return self + (rhs - self) * u

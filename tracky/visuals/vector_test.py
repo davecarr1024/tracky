@@ -1,3 +1,5 @@
+from pytest_subtests import SubTests
+
 from tracky.visuals.vector import Vector
 
 
@@ -51,3 +53,30 @@ def test_ge() -> None:
     assert not Vector(2, 3) >= Vector(3, 3)
     assert not Vector(2, 3) >= Vector(2, 4)
     assert not Vector(2, 3) >= Vector(3, 2)
+
+
+def test_lerp(subtests: SubTests) -> None:
+    for lhs, rhs, u, expected in list[tuple[Vector, Vector, float, Vector]](
+        [
+            (
+                Vector(0, 0),
+                Vector(100, 50),
+                0,
+                Vector(0, 0),
+            ),
+            (
+                Vector(0, 0),
+                Vector(100, 50),
+                0.5,
+                Vector(50, 25),
+            ),
+            (
+                Vector(0, 0),
+                Vector(100, 50),
+                1,
+                Vector(100, 50),
+            ),
+        ]
+    ):
+        with subtests.test(lhs=lhs, rhs=rhs, u=u, expected=expected):
+            assert lhs.lerp(rhs, u) == expected
