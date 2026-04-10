@@ -355,11 +355,59 @@ Avoid:
 
 ## 12. Open Questions
 
-- How much coupling slack to simulate?
-- How precise should stopping behavior be?
-- When to introduce signals / collision avoidance?
-- How complex should tile rules become?
-- How far to push AI planning vs keeping it simple?
+### 12.1 Coupling Mechanics
+
+- **Slack model**: Should coupling be rigid (no slack) initially, with slack added later, or should a small fixed slack be present from the start? Rigid is simpler but feels wrong for switching; slack adds complexity but matters for realism.
+- **Constraint resolution order**: When a consist has multiple coupled cars, in what order do forces propagate? Push from rear vs. pull from front may need different handling.
+- **Coupling detection**: What proximity and relative-speed thresholds trigger automatic coupling? Should the player initiate coupling explicitly (button press when close) or should it happen on contact?
+- **Consist integrity**: If a car is coupled front-and-rear (e.g., sandwiched), how is force propagated through it vs. around it?
+
+### 12.2 Switch State and Control
+
+- **Switch ownership**: Who controls a switch — the player directly, the locomotive (as it approaches), or a separate operator layer? All three are valid design choices with different gameplay feels.
+- **Switch locking**: Should a switch lock while a train is occupying it? This is realistic but adds complexity.
+- **Derailment**: Should traversing a switch in the wrong position be an error, derail the train, or be silently ignored? Derailment adds stakes but requires recovery mechanics.
+- **Switch memory**: Does a switch return to a default position or stay where last thrown?
+
+### 12.3 Stopping and Positioning
+
+- **Stopping precision**: The current physics model uses continuous damping. Is this precise enough for spotting cars at industries, or does it need a "creep and stop" low-speed mode?
+- **Gravity**: Should grade/slope affect speed? This is out of scope for a flat grid but worth keeping in mind.
+- **Collision**: Should cars physically block each other, or is that deferred? Collision detection on a 1D track graph is simpler than in 2D but still needs careful handling.
+
+### 12.4 Rendering and Visuals
+
+- **Curved rendering**: Curved connections are currently approximated geometrically via `Projection.connection_lerp()`. Should curves be rendered as actual Bezier/arc segments, or is the current linear interpolation sufficient?
+- **Car rendering**: Cars span multiple connections (their length can cross piece boundaries). How should a car that straddles a curve and a straight be rendered?
+- **Camera**: Should the viewport be fixed, or should it pan/zoom to follow the locomotive?
+- **Visual fidelity**: Pure colored rectangles and lines? Pixel art sprites? This affects scope significantly.
+
+### 12.5 Tile World
+
+- **Tile vs. track decoupling**: The design separates the tile grid from the track graph. Is this the right call, or should track pieces carry all tile metadata directly? The current `Piece` class has no tile-type concept.
+- **Influence resolution order**: During diffusion, should all tiles update simultaneously (double-buffered) or in scan order? Simultaneous is correct but requires extra memory.
+- **Tile rules complexity**: Rules like "traffic ↑ → ballast ↑ → vegetation ↓" are easy to say but hard to tune. How will rules be authored — hardcoded, data-driven, or scripted?
+- **Performance**: With a large grid and per-tick influence spreading, will Python be fast enough, or does this need numpy or a compiled extension?
+
+### 12.6 Control and AI
+
+- **`drive_to` implementation**: The assisted control layer needs to know the distance to a target on the track graph. Is shortest-path distance straightforward given the current graph representation, or is Dijkstra needed?
+- **Deadlock handling**: Switching puzzles can deadlock (no legal moves). Should the puzzle designer prevent this, or should the solver detect and report it?
+- **AI depth**: How far should the task planner go? A simple BFS/DFS over maneuver steps is achievable. Full STRIPS-style planning is probably overkill. What's the right level?
+- **Mixed control**: When the AI is executing a plan, what input can the player override? Full override? Pause only? This affects how the control layers interact.
+
+### 12.7 Save / Load and Layout
+
+- **Serialization format**: JSON is the obvious choice for layouts. What is the canonical representation of a `Piece` (position + connection directions + switch state)?
+- **Versioning**: How will save files evolve as the game changes? A schema version field from the start avoids pain later.
+- **Layout validation**: When loading a layout, what checks are required to ensure the graph is consistent?
+
+### 12.8 Architecture
+
+- **Consist as first-class object**: The current `Car` / `CarManager` model treats all cars identically. Should `Consist` be a separate class managed by a `ConsistManager`, or should consist membership be derived dynamically from coupling links?
+- **Switch piece representation**: The current `Piece` / `Connection` model can represent switch topologies (multiple connections in same direction), but switch state (which branch is active) is not yet modeled. Where does switch state live — on `Piece`, on a separate `Switch` entity, or on the `Grid`?
+- **Locomotive vs. Car**: Should `Locomotive` be a subclass of `Car` or a separate entity that wraps a car? Subclassing is simpler; composition is more flexible if locomotives can be swapped.
+- **Simulation tick rate**: The current `update(t, dt)` interface is flexible. Should the sim target a fixed timestep (e.g., 60 Hz physics) with interpolation for rendering, or is variable timestep acceptable?
 
 ---
 
